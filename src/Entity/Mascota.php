@@ -35,6 +35,15 @@ class Mascota
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $foto = null;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $nota = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTime $updatedAt = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -120,6 +129,42 @@ class Mascota
     public function setFoto(?string $foto): static
     {
         $this->foto = $foto;
+
+        return $this;
+    }
+
+    public function getNota(): ?string
+    {
+        return $this->nota;
+    }
+
+    public function setNota(?string $nota): static
+    {
+        $this->nota = $nota;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTime
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTime $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }
