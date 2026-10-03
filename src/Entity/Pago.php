@@ -32,6 +32,10 @@ class Pago
     #[ORM\Column(nullable: true)]
     private ?\DateTime $updatedAt = null;
 
+    #[ORM\ManyToOne(inversedBy: 'pagos')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Cita $cita = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -105,6 +109,18 @@ class Pago
     public function setUpdatedAt(?\DateTime $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function getCita(): ?Cita
+    {
+        return $this->cita;
+    }
+
+    public function setCita(?Cita $cita): static
+    {
+        $this->cita = $cita;
 
         return $this;
     }

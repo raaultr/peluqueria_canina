@@ -23,6 +23,14 @@ class CitaServicio
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $observaciones = null;
 
+    #[ORM\ManyToOne(inversedBy: 'citaServicios')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Cita $cita = null;
+
+    #[ORM\ManyToOne(inversedBy: 'citaServicios')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Servicio $servicio = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -60,6 +68,30 @@ class CitaServicio
     public function setObservaciones(?string $observaciones): static
     {
         $this->observaciones = $observaciones;
+
+        return $this;
+    }
+
+    public function getCita(): ?Cita
+    {
+        return $this->cita;
+    }
+
+    public function setCita(?Cita $cita): static
+    {
+        $this->cita = $cita;
+
+        return $this;
+    }
+
+    public function getServicio(): ?Servicio
+    {
+        return $this->servicio;
+    }
+
+    public function setServicio(?Servicio $servicio): static
+    {
+        $this->servicio = $servicio;
 
         return $this;
     }

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -35,7 +37,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 100)]
-    private ?string $çnombre = null;
+    private ?string $nombre = null;
 
     #[ORM\Column(length: 150)]
     private ?string $apellido = null;
@@ -51,6 +53,38 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(nullable: true)]
     private ?\DateTime $updatedAt = null;
+
+    /**
+     * @var Collection<int, Venta>
+     */
+    #[ORM\OneToMany(targetEntity: Venta::class, mappedBy: 'cliente')]
+    private Collection $ventasComoCliente;
+
+    /**
+     * @var Collection<int, Venta>
+     */
+    #[ORM\OneToMany(targetEntity: Venta::class, mappedBy: 'trabajador')]
+    private Collection $ventasComoTrabajador;
+
+    /**
+     * @var Collection<int, Mascota>
+     */
+    #[ORM\OneToMany(targetEntity: Mascota::class, mappedBy: 'cliente')]
+    private Collection $mascotas;
+
+    /**
+     * @var Collection<int, Cita>
+     */
+    #[ORM\OneToMany(targetEntity: Cita::class, mappedBy: 'trabajador')]
+    private Collection $citasComoTrabajador;
+
+    public function __construct()
+    {
+        $this->ventasComoCliente = new ArrayCollection();
+        $this->ventasComoTrabajador = new ArrayCollection();
+        $this->mascotas = new ArrayCollection();
+        $this->citasComoTrabajador = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -127,14 +161,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $data;
     }
 
-    public function getçnombre(): ?string
+    public function getNombre(): ?string
     {
-        return $this->çnombre;
+        return $this->nombre;
     }
 
-    public function setçnombre(string $çnombre): static
+    public function setNombre(string $nombre): static
     {
-        $this->çnombre = $çnombre;
+        $this->nombre = $nombre;
 
         return $this;
     }
@@ -195,6 +229,126 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUpdatedAt(?\DateTime $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Venta>
+     */
+    public function getVentasComoCliente(): Collection
+    {
+        return $this->ventasComoCliente;
+    }
+
+    public function addVentasComoCliente(Venta $ventasComoCliente): static
+    {
+        if (!$this->ventasComoCliente->contains($ventasComoCliente)) {
+            $this->ventasComoCliente->add($ventasComoCliente);
+            $ventasComoCliente->setCliente($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVentasComoCliente(Venta $ventasComoCliente): static
+    {
+        if ($this->ventasComoCliente->removeElement($ventasComoCliente)) {
+            // set the owning side to null (unless already changed)
+            if ($ventasComoCliente->getCliente() === $this) {
+                $ventasComoCliente->setCliente(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Venta>
+     */
+    public function getVentasComoTrabajador(): Collection
+    {
+        return $this->ventasComoTrabajador;
+    }
+
+    public function addVentasComoTrabajador(Venta $ventasComoTrabajador): static
+    {
+        if (!$this->ventasComoTrabajador->contains($ventasComoTrabajador)) {
+            $this->ventasComoTrabajador->add($ventasComoTrabajador);
+            $ventasComoTrabajador->setTrabajador($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVentasComoTrabajador(Venta $ventasComoTrabajador): static
+    {
+        if ($this->ventasComoTrabajador->removeElement($ventasComoTrabajador)) {
+            // set the owning side to null (unless already changed)
+            if ($ventasComoTrabajador->getTrabajador() === $this) {
+                $ventasComoTrabajador->setTrabajador(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Mascota>
+     */
+    public function getMascotas(): Collection
+    {
+        return $this->mascotas;
+    }
+
+    public function addMascota(Mascota $mascota): static
+    {
+        if (!$this->mascotas->contains($mascota)) {
+            $this->mascotas->add($mascota);
+            $mascota->setCliente($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMascota(Mascota $mascota): static
+    {
+        if ($this->mascotas->removeElement($mascota)) {
+            // set the owning side to null (unless already changed)
+            if ($mascota->getCliente() === $this) {
+                $mascota->setCliente(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Cita>
+     */
+    public function getCitasComoTrabajador(): Collection
+    {
+        return $this->citasComoTrabajador;
+    }
+
+    public function addCitasComoTrabajador(Cita $citasComoTrabajador): static
+    {
+        if (!$this->citasComoTrabajador->contains($citasComoTrabajador)) {
+            $this->citasComoTrabajador->add($citasComoTrabajador);
+            $citasComoTrabajador->setTrabajador($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCitasComoTrabajador(Cita $citasComoTrabajador): static
+    {
+        if ($this->citasComoTrabajador->removeElement($citasComoTrabajador)) {
+            // set the owning side to null (unless already changed)
+            if ($citasComoTrabajador->getTrabajador() === $this) {
+                $citasComoTrabajador->setTrabajador(null);
+            }
+        }
 
         return $this;
     }

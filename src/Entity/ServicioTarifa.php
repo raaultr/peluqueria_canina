@@ -20,6 +20,10 @@ class ServicioTarifa
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     private ?string $precio = null;
 
+    #[ORM\ManyToOne(inversedBy: 'servicioTarifas')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Servicio $servicio = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -45,6 +49,18 @@ class ServicioTarifa
     public function setPrecio(?string $precio): static
     {
         $this->precio = $precio;
+
+        return $this;
+    }
+
+    public function getServicio(): ?Servicio
+    {
+        return $this->servicio;
+    }
+
+    public function setServicio(?Servicio $servicio): static
+    {
+        $this->servicio = $servicio;
 
         return $this;
     }

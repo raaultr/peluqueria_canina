@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\MascotaRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -43,6 +45,21 @@ class Mascota
 
     #[ORM\Column(nullable: true)]
     private ?\DateTime $updatedAt = null;
+
+    #[ORM\ManyToOne(inversedBy: 'mascotas')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $cliente = null;
+
+    /**
+     * @var Collection<int, Cita>
+     */
+    #[ORM\OneToMany(targetEntity: Cita::class, mappedBy: 'mascota')]
+    private Collection $citas;
+
+    public function __construct()
+    {
+        $this->citas = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -165,6 +182,48 @@ class Mascota
     public function setUpdatedAt(?\DateTime $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function getCliente(): ?User
+    {
+        return $this->cliente;
+    }
+
+    public function setCliente(?User $cliente): static
+    {
+        $this->cliente = $cliente;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Cita>
+     */
+    public function getCitas(): Collection
+    {
+        return $this->citas;
+    }
+
+    public function addCita(Cita $cita): static
+    {
+        if (!$this->citas->contains($cita)) {
+            $this->citas->add($cita);
+            $cita->setMascota($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCita(Cita $cita): static
+    {
+        if ($this->citas->removeElement($cita)) {
+            // set the owning side to null (unless already changed)
+            if ($cita->getMascota() === $this) {
+                $cita->setMascota(null);
+            }
+        }
 
         return $this;
     }

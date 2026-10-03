@@ -31,6 +31,14 @@ class Venta
     #[ORM\OneToMany(targetEntity: VentaDetalles::class, mappedBy: 'venta')]
     private Collection $ventaDetalles;
 
+    #[ORM\ManyToOne(inversedBy: 'ventasComoCliente')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $cliente = null;
+
+    #[ORM\ManyToOne(inversedBy: 'ventasComoTrabajador')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $trabajador = null;
+
     public function __construct()
     {
         $this->ventaDetalles = new ArrayCollection();
@@ -103,6 +111,30 @@ class Venta
                 $ventaDetalle->setVenta(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCliente(): ?User
+    {
+        return $this->cliente;
+    }
+
+    public function setCliente(?User $cliente): static
+    {
+        $this->cliente = $cliente;
+
+        return $this;
+    }
+
+    public function getTrabajador(): ?User
+    {
+        return $this->trabajador;
+    }
+
+    public function setTrabajador(?User $trabajador): static
+    {
+        $this->trabajador = $trabajador;
 
         return $this;
     }

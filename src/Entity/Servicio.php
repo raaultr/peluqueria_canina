@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ServicioRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -31,6 +33,24 @@ class Servicio
 
     #[ORM\Column(nullable: true)]
     private ?\DateTime $updatedAt = null;
+
+    /**
+     * @var Collection<int, CitaServicio>
+     */
+    #[ORM\OneToMany(targetEntity: CitaServicio::class, mappedBy: 'servicio')]
+    private Collection $citaServicios;
+
+    /**
+     * @var Collection<int, ServicioTarifa>
+     */
+    #[ORM\OneToMany(targetEntity: ServicioTarifa::class, mappedBy: 'servicio')]
+    private Collection $servicioTarifas;
+
+    public function __construct()
+    {
+        $this->citaServicios = new ArrayCollection();
+        $this->servicioTarifas = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -105,6 +125,66 @@ class Servicio
     public function setUpdatedAt(?\DateTime $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CitaServicio>
+     */
+    public function getCitaServicios(): Collection
+    {
+        return $this->citaServicios;
+    }
+
+    public function addCitaServicio(CitaServicio $citaServicio): static
+    {
+        if (!$this->citaServicios->contains($citaServicio)) {
+            $this->citaServicios->add($citaServicio);
+            $citaServicio->setServicio($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCitaServicio(CitaServicio $citaServicio): static
+    {
+        if ($this->citaServicios->removeElement($citaServicio)) {
+            // set the owning side to null (unless already changed)
+            if ($citaServicio->getServicio() === $this) {
+                $citaServicio->setServicio(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ServicioTarifa>
+     */
+    public function getServicioTarifas(): Collection
+    {
+        return $this->servicioTarifas;
+    }
+
+    public function addServicioTarifa(ServicioTarifa $servicioTarifa): static
+    {
+        if (!$this->servicioTarifas->contains($servicioTarifa)) {
+            $this->servicioTarifas->add($servicioTarifa);
+            $servicioTarifa->setServicio($this);
+        }
+
+        return $this;
+    }
+
+    public function removeServicioTarifa(ServicioTarifa $servicioTarifa): static
+    {
+        if ($this->servicioTarifas->removeElement($servicioTarifa)) {
+            // set the owning side to null (unless already changed)
+            if ($servicioTarifa->getServicio() === $this) {
+                $servicioTarifa->setServicio(null);
+            }
+        }
 
         return $this;
     }

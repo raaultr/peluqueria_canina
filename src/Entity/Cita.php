@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CitaRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -31,6 +33,31 @@ class Cita
 
     #[ORM\Column(nullable: true)]
     private ?\DateTime $updatedAt = null;
+
+    #[ORM\ManyToOne(inversedBy: 'citasComoTrabajador')]
+    private ?User $trabajador = null;
+
+    #[ORM\ManyToOne(inversedBy: 'citas')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Mascota $mascota = null;
+
+    /**
+     * @var Collection<int, Pago>
+     */
+    #[ORM\OneToMany(targetEntity: Pago::class, mappedBy: 'cita')]
+    private Collection $pagos;
+
+    /**
+     * @var Collection<int, CitaServicio>
+     */
+    #[ORM\OneToMany(targetEntity: CitaServicio::class, mappedBy: 'cita')]
+    private Collection $citaServicios;
+
+    public function __construct()
+    {
+        $this->pagos = new ArrayCollection();
+        $this->citaServicios = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -105,6 +132,90 @@ class Cita
     public function setUpdatedAt(?\DateTime $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function getTrabajador(): ?User
+    {
+        return $this->trabajador;
+    }
+
+    public function setTrabajador(?User $trabajador): static
+    {
+        $this->trabajador = $trabajador;
+
+        return $this;
+    }
+
+    public function getMascota(): ?Mascota
+    {
+        return $this->mascota;
+    }
+
+    public function setMascota(?Mascota $mascota): static
+    {
+        $this->mascota = $mascota;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Pago>
+     */
+    public function getPagos(): Collection
+    {
+        return $this->pagos;
+    }
+
+    public function addPago(Pago $pago): static
+    {
+        if (!$this->pagos->contains($pago)) {
+            $this->pagos->add($pago);
+            $pago->setCita($this);
+        }
+
+        return $this;
+    }
+
+    public function removePago(Pago $pago): static
+    {
+        if ($this->pagos->removeElement($pago)) {
+            // set the owning side to null (unless already changed)
+            if ($pago->getCita() === $this) {
+                $pago->setCita(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CitaServicio>
+     */
+    public function getCitaServicios(): Collection
+    {
+        return $this->citaServicios;
+    }
+
+    public function addCitaServicio(CitaServicio $citaServicio): static
+    {
+        if (!$this->citaServicios->contains($citaServicio)) {
+            $this->citaServicios->add($citaServicio);
+            $citaServicio->setCita($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCitaServicio(CitaServicio $citaServicio): static
+    {
+        if ($this->citaServicios->removeElement($citaServicio)) {
+            // set the owning side to null (unless already changed)
+            if ($citaServicio->getCita() === $this) {
+                $citaServicio->setCita(null);
+            }
+        }
 
         return $this;
     }
