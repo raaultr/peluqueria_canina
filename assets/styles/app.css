@@ -1,7 +1,47 @@
 @import "tailwindcss";
 
+:root {
+    color-scheme: light;
+
+    --color-brand: #2563eb;
+    --color-brand-hover: #1d4ed8;
+    --color-brand-soft: #eff6ff;
+
+    --color-page: #f4f7fc;
+    --color-surface: #ffffff;
+    --color-surface-muted: #f8fafc;
+
+    --color-text-primary: #1e293b;
+    --color-text-secondary: #64748b;
+    --color-text-muted: #94a3b8;
+    --color-border: #e2e8f0;
+
+    --color-success: #059669;
+    --color-success-soft: #ecfdf5;
+    --color-warning: #d97706;
+    --color-warning-soft: #fffbeb;
+    --color-danger: #e11d48;
+    --color-danger-hover: #be123c;
+    --color-danger-soft: #fff1f2;
+
+    --button-primary-background: var(--color-brand);
+    --button-primary-hover: var(--color-brand-hover);
+    --button-primary-text: #ffffff;
+    --button-secondary-background: var(--color-surface);
+    --button-secondary-hover: var(--color-surface-muted);
+    --button-secondary-text: var(--color-text-primary);
+    --button-danger-background: var(--color-danger);
+    --button-danger-hover: var(--color-danger-hover);
+    --button-danger-text: #ffffff;
+
+    --focus-ring: #93c5fd;
+    --radius-control: 0.5rem;
+    --radius-panel: 0.75rem;
+    --shadow-panel: 0 1px 2px rgb(15 23 42 / 5%);
+}
+
 body {
     margin: 0;
-    background-color: #f4f7fc;
-    color: #1e293b;
+    background-color: var(--color-page);
+    color: var(--color-text-primary);
 }

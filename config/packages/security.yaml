@@ -36,8 +36,14 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
+        # Administración
         # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+
+        # Zona de empleados
+        - { path: ^/empleado, roles: ROLE_EMPLEADO }    
+
+        # Zona de clientes
+        - { path: ^/cliente, roles: ROLE_CLIENTE }
 
 when@test:
     security:
