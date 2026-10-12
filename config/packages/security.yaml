@@ -37,7 +37,7 @@ security:
     # Note: Only the *first* matching rule is applied
     access_control:
         # Administración
-        # - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/admin, roles: ROLE_ADMIN }
 
         # Zona de empleados
         - { path: ^/empleado, roles: ROLE_EMPLEADO }    

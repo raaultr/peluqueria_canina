@@ -45,9 +45,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 20)]
     private ?string $telefono = null;
 
-    #[ORM\Column(length: 20)]
-    private ?string $estado = null;
-
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -193,18 +190,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setTelefono(string $telefono): static
     {
         $this->telefono = $telefono;
-
-        return $this;
-    }
-
-    public function getEstado(): ?string
-    {
-        return $this->estado;
-    }
-
-    public function setEstado(string $estado): static
-    {
-        $this->estado = $estado;
 
         return $this;
     }
