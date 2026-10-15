@@ -5,18 +5,19 @@
 {% block body %}
     {% include 'admin/components/_navbar.html.twig' %}
 
-    <div class="min-h-screen pt-36 md:pl-64 md:pt-0">
-        <header class="flex h-16 items-center justify-end border-b border-(--color-border) bg-(--color-surface) px-5 md:px-8">
-            <div class="flex items-center gap-3">
-                <span class="hidden text-right sm:block">
-                    <span class="block text-sm font-semibold text-(--color-text-primary)">Administrador</span>
-                    <span class="block text-xs text-(--color-text-secondary)">Panel de gestión</span>
+    <div class="min-h-screen md:pl-64">
+        {% set display_name = (app.user.nombre ~ ' ' ~ app.user.apellido)|trim %}
+        {% set user_role = 'ROLE_ADMIN' in app.user.roles ? 'Administrador' : ('ROLE_EMPLEADO' in app.user.roles ? 'Empleado' : 'Cliente') %}
+        <header class="flex h-16 items-center justify-end border-b border-(--color-border) bg-(--color-surface) px-4 sm:px-5 md:px-8">
+            <div class="hidden items-center gap-3 md:flex">
+                <span class="text-right">
+                    <span class="block text-sm font-semibold text-(--color-text-primary)">{{ display_name }}</span>
+                    <span class="block text-xs text-(--color-text-secondary)">{{ user_role }}</span>
                 </span>
-                <span class="flex h-9 w-9 items-center justify-center rounded-full bg-(--color-brand-soft) text-sm font-bold text-(--color-brand)" aria-hidden="true">A</span>
+                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-(--color-brand-soft) text-sm font-bold text-(--color-brand)" role="img" aria-label="Avatar de {{ display_name }}">{{ display_name|slice(0, 1)|upper }}</span>
             </div>
         </header>
-
-        <main class="mx-auto max-w-7xl px-5 py-8 md:px-8 md:py-10">
+        <main class="mx-auto max-w-7xl px-4 py-6 sm:px-5 sm:py-8 md:px-8 md:py-10">
             <div class="mb-8 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
                 <div>
                     <p class="mb-2 text-sm font-medium text-(--color-brand)">{{ 'now'|date('d/m/Y') }}</p>
