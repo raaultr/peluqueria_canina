@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mascota index{% endblock %}
+
+{% block body %}
+    <h1>Mascota index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>Raza</th>
+                <th>Sexo</th>
+                <th>FechaNacimiento</th>
+                <th>Peso</th>
+                <th>Tamano</th>
+                <th>Foto</th>
+                <th>Nota</th>
+                <th>CreatedAt</th>
+                <th>UpdatedAt</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for mascotum in mascotas %}
+            <tr>
+                <td>{{ mascotum.id }}</td>
+                <td>{{ mascotum.nombre }}</td>
+                <td>{{ mascotum.raza }}</td>
+                <td>{{ mascotum.sexo }}</td>
+                <td>{{ mascotum.fechaNacimiento ? mascotum.fechaNacimiento|date('Y-m-d') : '' }}</td>
+                <td>{{ mascotum.peso }}</td>
+                <td>{{ mascotum.tamano }}</td>
+                <td>{{ mascotum.foto }}</td>
+                <td>{{ mascotum.nota }}</td>
+                <td>{{ mascotum.createdAt ? mascotum.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ mascotum.updatedAt ? mascotum.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_mascota_show', {'id': mascotum.id}) }}">show</a>
+                    <a href="{{ path('app_mascota_edit', {'id': mascotum.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="12">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_mascota_new') }}">Create new</a>
+{% endblock %}
