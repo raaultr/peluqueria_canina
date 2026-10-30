@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Citas | PeluCan{% endblock %}
+
+{% block body %}
+    {% include 'admin/components/_navbar.html.twig' %}
+
+    <div class="min-h-screen md:pl-64">
+        {% set display_name = (app.user.nombre ~ ' ' ~ app.user.apellido)|trim %}
+        <header class="flex h-16 items-center justify-end border-b border-(--color-border) bg-(--color-surface) px-4 sm:px-5 md:px-8">
+            <div class="hidden items-center gap-3 md:flex">
+                <span class="text-right"><span class="block text-sm font-semibold text-(--color-text-primary)">{{ display_name }}</span><span class="block text-xs text-(--color-text-secondary)">Administrador</span></span>
+                <span class="grid h-10 w-10 place-items-center rounded-full bg-(--color-brand-soft) text-sm font-bold text-(--color-brand)" role="img" aria-label="Avatar de {{ display_name }}">{{ display_name|slice(0, 1)|upper }}</span>
+            </div>
+        </header>
+
+        <main class="w-full px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-9 2xl:px-12">
+            <div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                <div><h1 class="text-2xl font-bold text-(--color-text-primary) sm:text-3xl">Citas</h1><p class="mt-1 text-sm text-(--color-text-secondary)">Organiza las visitas y revisa su estado.</p></div>
+                <a href="{{ path('app_cita_new') }}" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-(--radius-control) bg-(--button-primary-background) px-4 py-2 text-sm font-semibold text-(--button-primary-text) shadow-(--shadow-panel) transition hover:bg-(--button-primary-hover)"><svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Nueva cita</a>
+            </div>
+
+            <section aria-label="Listado de citas" class="overflow-hidden rounded-(--radius-panel) border border-(--color-border) bg-(--color-surface) shadow-(--shadow-panel)">
+                <div class="flex items-center justify-between border-b border-(--color-border) p-4"><h2 class="font-semibold text-(--color-text-primary)">Agenda</h2><span class="text-sm text-(--color-text-secondary)">{{ citas|length }} citas</span></div>
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-190 border-collapse text-left text-sm">
+                        <thead class="bg-(--color-surface-muted) text-xs font-semibold text-(--color-text-secondary)"><tr><th scope="col" class="px-5 py-3">Fecha y hora</th><th scope="col" class="px-4 py-3">Mascota</th><th scope="col" class="px-4 py-3">Cliente</th><th scope="col" class="px-4 py-3">Responsable</th><th scope="col" class="px-4 py-3">Estado</th><th scope="col" class="px-5 py-3 text-right">Acciones</th></tr></thead>
+                        <tbody class="divide-y divide-(--color-border)">
+                            {% for cita in citas %}
+                                {% set estado = cita.estado|lower %}
+                                <tr class="transition hover:bg-(--color-brand-soft)/40">
+                                    <td class="whitespace-nowrap px-5 py-4 font-medium text-(--color-text-primary)">{{ cita.inicio ? cita.inicio|date('d/m/Y H:i') : 'Sin fecha' }}</td>
+                                    <td class="px-4 py-4 text-(--color-text-primary)">{{ cita.mascota.nombre }}</td>
+                                    <td class="px-4 py-4 text-(--color-text-secondary)">{{ cita.mascota.cliente ? (cita.mascota.cliente.nombre ~ ' ' ~ cita.mascota.cliente.apellido)|trim : '—' }}</td>
+                                    <td class="px-4 py-4 text-(--color-text-secondary)">{{ cita.trabajador ? (cita.trabajador.nombre ~ ' ' ~ cita.trabajador.apellido)|trim : 'Sin asignar' }}</td>
+                                    <td class="px-4 py-4"><span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {% if estado in ['confirmada', 'realizada'] %}bg-(--color-success-soft) text-(--color-success){% elseif estado == 'cancelada' %}bg-(--color-danger-soft) text-(--color-danger){% else %}bg-(--color-warning-soft) text-(--color-warning){% endif %}">{{ cita.estado }}</span></td>
+                                    <td class="px-5 py-3"><div class="flex justify-end"><a href="{{ path('app_cita_edit', {id: cita.id}) }}" aria-label="Editar cita de {{ cita.mascota.nombre }}" title="Editar cita" class="grid h-9 w-9 place-items-center rounded-(--radius-control) bg-(--color-warning-soft) text-(--color-warning) transition hover:bg-(--color-warning) hover:text-white"><svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><path d="m14 5 5 5M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z"/></svg></a></div></td>
+                                </tr>
+                            {% else %}
+                                <tr><td colspan="6" class="px-5 py-12 text-center text-sm text-(--color-text-secondary)">Todavía no hay citas registradas.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    {% if modal %}
+        {{ include('admin/components/_form_modal.html.twig', {modalTitle: modal.title, modalDescription: modal.description, modalCloseUrl: modal.closeUrl, modalFormTemplate: modal.formTemplate, modalSubmitLabel: modal.submitLabel, form: modal.form}) }}
+    {% endif %}
+{% endblock %}

@@ -138,3 +138,32 @@ document.querySelectorAll('[data-mascotas-view]').forEach((view) => {
 
 	updateTable();
 });
+
+const adminModal = document.querySelector('[data-admin-modal]');
+if (adminModal) {
+	const modalContent = adminModal.querySelector('[data-admin-modal-content]');
+	const closeModal = () => window.location.assign(adminModal.dataset.closeUrl);
+	const focusableElements = [...(modalContent?.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])') || [])];
+
+	modalContent?.querySelector('input:not([type="hidden"]), select, textarea, button')?.focus();
+	adminModal.querySelector('[data-modal-backdrop]')?.addEventListener('click', closeModal);
+	document.addEventListener('keydown', (event) => {
+		if (event.key === 'Escape') {
+			closeModal();
+			return;
+		}
+		if (event.key !== 'Tab' || focusableElements.length === 0) {
+			return;
+		}
+
+		const firstElement = focusableElements[0];
+		const lastElement = focusableElements[focusableElements.length - 1];
+		if (event.shiftKey && document.activeElement === firstElement) {
+			event.preventDefault();
+			lastElement.focus();
+		} else if (!event.shiftKey && document.activeElement === lastElement) {
+			event.preventDefault();
+			firstElement.focus();
+		}
+	});
+}

@@ -3,6 +3,9 @@
 namespace App\DataFixtures;
 
 use App\Entity\Mascota;
+use App\Entity\Cita;
+use App\Entity\CitaServicio;
+use App\Entity\Servicio;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -79,6 +82,71 @@ final class AppFixtures extends Fixture
                 ->setCliente($client);
 
             $manager->persist($mascota);
+        }
+
+        $serviceData = [
+            ['Baño y secado', 'Baño completo con secado y cepillado.', 60],
+            ['Corte higiénico', 'Aseo de zonas sensibles y repaso de uñas.', 35],
+            ['Corte de raza', 'Corte adaptado a la raza y tipo de pelaje.', 75],
+            ['Deslanado', 'Retirada de pelo muerto y cepillado profundo.', 50],
+        ];
+        $serviceRepository = $manager->getRepository(Servicio::class);
+        $services = [];
+
+        foreach ($serviceData as [$name, $description, $duration]) {
+            $service = $serviceRepository->findOneBy(['nombre' => $name]);
+
+            if (!$service) {
+                $service = (new Servicio())
+                    ->setNombre($name)
+                    ->setDescripcion($description)
+                    ->setDuracionMins($duration)
+                    ->setActivo(true)
+                    ->setCreatedAt(new \DateTimeImmutable());
+                $manager->persist($service);
+            }
+
+            $services[$name] = $service;
+        }
+
+        $appointmentData = [
+            ['Luna', '2026-10-28 10:00', '2026-10-28 11:00', 'Realizada', 'Baño y secado'],
+            ['Max', '2026-10-31 12:30', '2026-10-31 13:05', 'Confirmada', 'Corte higiénico'],
+            ['Nala', '2026-11-02 09:30', '2026-11-02 10:45', 'Pendiente', 'Corte de raza'],
+            ['Bella', '2026-11-04 16:00', '2026-11-04 16:50', 'Confirmada', 'Deslanado'],
+            ['Kira', '2026-10-20 11:00', '2026-10-20 12:00', 'Realizada', 'Baño y secado'],
+            ['Coco', '2026-11-06 15:00', '2026-11-06 15:35', 'Pendiente', 'Corte higiénico'],
+        ];
+        $mascotaRepository = $manager->getRepository(Mascota::class);
+        $citaRepository = $manager->getRepository(Cita::class);
+
+        foreach ($appointmentData as [$petName, $start, $end, $status, $serviceName]) {
+            $mascota = $mascotaRepository->findOneBy(['nombre' => $petName]);
+            if (!$mascota) {
+                continue;
+            }
+
+            $startAt = new \DateTime($start);
+            if ($citaRepository->findOneBy(['mascota' => $mascota, 'inicio' => $startAt])) {
+                continue;
+            }
+
+            $cita = (new Cita())
+                ->setInicio($startAt)
+                ->setFin(new \DateTime($end))
+                ->setEstado($status)
+                ->setNotas('Cita de demostración')
+                ->setCreatedAt(new \DateTimeImmutable())
+                ->setTrabajador($admin)
+                ->setMascota($mascota);
+            $manager->persist($cita);
+
+            $citaServicio = (new CitaServicio())
+                ->setPrecioAplicado('35.00')
+                ->setDuracionAplicada($services[$serviceName]->getDuracionMins())
+                ->setCita($cita)
+                ->setServicio($services[$serviceName]);
+            $manager->persist($citaServicio);
         }
 
         $manager->flush();

@@ -212,4 +212,14 @@
             </section>
         </main>
     </div>
+    {% if modal %}
+        {{ include('admin/components/_form_modal.html.twig', {
+            modalTitle: modal.title,
+            modalDescription: modal.description,
+            modalCloseUrl: modal.closeUrl,
+            modalFormTemplate: modal.formTemplate,
+            modalSubmitLabel: modal.submitLabel|default('Guardar mascota'),
+            form: modal.form
+        }) }}
+    {% endif %}
 {% endblock %}
