@@ -6,6 +6,7 @@ use App\Entity\Mascota;
 use App\Form\MascotaType;
 use App\Repository\CitaRepository;
 use App\Repository\MascotaRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,9 +28,13 @@ final class MascotaController extends AbstractController
     }
 
     #[Route('/new', name: 'app_mascota_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, MascotaRepository $mascotaRepository): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, MascotaRepository $mascotaRepository, UserRepository $userRepository): Response
     {
         $mascotum = new Mascota();
+        $cliente = $userRepository->find($request->query->getInt('clienteId'));
+        if ($cliente && in_array('ROLE_CLIENTE', $cliente->getRoles(), true)) {
+            $mascotum->setCliente($cliente);
+        }
         $form = $this->createForm(MascotaType::class, $mascotum);
         $form->handleRequest($request);
 

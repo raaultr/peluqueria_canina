@@ -26,29 +26,52 @@ document.addEventListener('click', (event) => {
 	toggle.setAttribute('aria-label', isVisible ? 'Ocultar contraseña' : 'Mostrar contraseña');
 });
 
-document.querySelectorAll('[data-mascotas-view]').forEach((view) => {
-	const rows = [...view.querySelectorAll('[data-mascota-row]')];
-	const search = view.querySelector('[data-mascotas-search]');
-	const filterPanel = view.querySelector('[data-mascotas-filters-panel]');
-	const filterToggle = view.querySelector('[data-mascotas-filters-toggle]');
-	const filterSelects = [...view.querySelectorAll('[data-mascotas-filter]')];
-	const pageSizeSelect = view.querySelector('[data-mascotas-page-size]');
-	const previousButton = view.querySelector('[data-mascotas-previous]');
-	const nextButton = view.querySelector('[data-mascotas-next]');
-	const emptyState = view.querySelector('[data-mascotas-empty]');
+const initializedAdminLists = new WeakSet();
+const initializeAdminLists = () => {
+	document.querySelectorAll('[data-admin-list]').forEach((view) => {
+		if (initializedAdminLists.has(view)) {
+			return;
+		}
+		initializedAdminLists.add(view);
+
+	const rows = [...view.querySelectorAll('[data-admin-row]')];
+	const search = view.querySelector('[data-admin-search]');
+	const filterPanel = view.querySelector('[data-admin-filters-panel]');
+	const filterToggle = view.querySelector('[data-admin-filters-toggle]');
+	const filterSelects = [...view.querySelectorAll('[data-admin-filter]')];
+	const dateFrom = view.querySelector('[data-admin-date-from]');
+	const dateTo = view.querySelector('[data-admin-date-to]');
+	const pageSizeSelect = view.querySelector('[data-admin-page-size]');
+	const previousButton = view.querySelector('[data-admin-previous]');
+	const nextButton = view.querySelector('[data-admin-next]');
+	const emptyState = view.querySelector('[data-admin-empty]');
+	const itemName = view.dataset.adminItemName || 'registros';
 	let currentPage = 1;
 	let pageSize = Number(pageSizeSelect?.value || 10);
+	const syncStateActions = () => {
+		const selectedState = view.querySelector('[data-admin-filter="estado"]')?.value || 'todos';
+		view.querySelectorAll('[data-admin-state-link]').forEach((link) => {
+			const linkUrl = new URL(link.href);
+			linkUrl.searchParams.set('estado', selectedState);
+			link.href = linkUrl.toString();
+		});
+		view.querySelectorAll('[data-admin-status-form]').forEach((form) => {
+			const formUrl = new URL(form.action);
+			formUrl.searchParams.set('estado', selectedState);
+			form.action = formUrl.toString();
+		});
+	};
 
 	const updateTable = () => {
 		const query = search?.value.trim().toLocaleLowerCase() || '';
-		const selectedFilters = Object.fromEntries(filterSelects.map((select) => [select.dataset.mascotasFilter, select.value]));
+		const selectedFilters = Object.fromEntries(filterSelects.map((select) => [select.dataset.adminFilter, select.value]));
 		const filteredRows = rows.filter((row) => {
 			const matchesSearch = row.textContent.toLocaleLowerCase().includes(query);
-			const matchesSex = !selectedFilters.sexo || row.dataset.mascotaSexo === selectedFilters.sexo;
-			const matchesSize = !selectedFilters.tamano || row.dataset.mascotaTamano === selectedFilters.tamano;
-			const matchesPhoto = !selectedFilters.foto || row.dataset.mascotaFoto === selectedFilters.foto;
+			const matchesFilters = Object.entries(selectedFilters).every(([name, value]) => !value || value === 'todos' || row.getAttribute(`data-filter-${name}`) === value);
+			const createdAt = row.getAttribute('data-filter-created-at') || '';
+			const matchesDateRange = (!dateFrom?.value || createdAt >= dateFrom.value) && (!dateTo?.value || createdAt <= dateTo.value);
 
-			return matchesSearch && matchesSex && matchesSize && matchesPhoto;
+			return matchesSearch && matchesFilters && matchesDateRange;
 		});
 		const pageCount = Math.max(1, Math.ceil(filteredRows.length / pageSize));
 		currentPage = Math.min(currentPage, pageCount);
@@ -63,20 +86,20 @@ document.querySelectorAll('[data-mascotas-view]').forEach((view) => {
 			emptyState.hidden = filteredRows.length > 0;
 			const emptyMessage = emptyState.querySelector('td');
 			if (emptyMessage) {
-				emptyMessage.textContent = rows.length ? 'No se encontraron mascotas con estos filtros.' : 'Todavía no hay mascotas registradas.';
+				emptyMessage.textContent = rows.length ? view.dataset.adminEmptyFiltered : view.dataset.adminEmptyAll;
 			}
 		}
 
 		const lastRow = Math.min(firstRow + visibleRows.size, filteredRows.length);
 		const countText = filteredRows.length === rows.length
-			? `${filteredRows.length} mascotas`
-			: `${filteredRows.length} de ${rows.length} mascotas`;
+			? `${filteredRows.length} ${itemName}`
+			: `${filteredRows.length} de ${rows.length} ${itemName}`;
 		const paginationText = filteredRows.length
-			? `Mostrando ${firstRow + 1}–${lastRow} de ${filteredRows.length} mascotas`
-			: `Mostrando 0 de ${rows.length} mascotas`;
-		const count = view.querySelector('[data-mascotas-count]');
-		const paginationSummary = view.querySelector('[data-mascotas-pagination-summary]');
-		const pageIndicator = view.querySelector('[data-mascotas-page-indicator]');
+			? `Mostrando ${firstRow + 1}–${lastRow} de ${filteredRows.length} ${itemName}`
+			: `Mostrando 0 de ${rows.length} ${itemName}`;
+		const count = view.querySelector('[data-admin-count]');
+		const paginationSummary = view.querySelector('[data-admin-pagination-summary]');
+		const pageIndicator = view.querySelector('[data-admin-page-indicator]');
 
 		if (count) {
 			count.textContent = countText;
@@ -101,6 +124,13 @@ document.querySelectorAll('[data-mascotas-view]').forEach((view) => {
 	});
 	filterSelects.forEach((select) => select.addEventListener('change', () => {
 		currentPage = 1;
+		if (select.dataset.adminFilter === 'estado') {
+			syncStateActions();
+		}
+		updateTable();
+	}));
+	[dateFrom, dateTo].filter(Boolean).forEach((input) => input.addEventListener('change', () => {
+		currentPage = 1;
 		updateTable();
 	}));
 	pageSizeSelect?.addEventListener('change', () => {
@@ -115,15 +145,22 @@ document.querySelectorAll('[data-mascotas-view]').forEach((view) => {
 
 		filterPanel.hidden = !filterPanel.hidden;
 		filterToggle.setAttribute('aria-expanded', String(!filterPanel.hidden));
-		view.querySelector('[data-mascotas-filter-chevron]')?.classList.toggle('rotate-180', !filterPanel.hidden);
+		view.querySelector('[data-admin-filter-chevron]')?.classList.toggle('rotate-180', !filterPanel.hidden);
 	});
-	view.querySelector('[data-mascotas-reset]')?.addEventListener('click', () => {
+	view.querySelector('[data-admin-reset]')?.addEventListener('click', () => {
 		if (search) {
 			search.value = '';
 		}
 		filterSelects.forEach((select) => {
-			select.value = '';
+			select.value = select.dataset.adminFilter === 'estado' ? 'todos' : '';
 		});
+		syncStateActions();
+		if (dateFrom) {
+			dateFrom.value = '';
+		}
+		if (dateTo) {
+			dateTo.value = '';
+		}
 		currentPage = 1;
 		updateTable();
 	});
@@ -138,6 +175,10 @@ document.querySelectorAll('[data-mascotas-view]').forEach((view) => {
 
 	updateTable();
 });
+};
+
+initializeAdminLists();
+document.addEventListener('turbo:load', initializeAdminLists);
 
 const adminModal = document.querySelector('[data-admin-modal]');
 if (adminModal) {

@@ -45,6 +45,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 20)]
     private ?string $telefono = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $direccion = null;
+
+    #[ORM\Column(options: ['default' => true])]
+    private bool $activo = true;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -190,6 +196,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setTelefono(string $telefono): static
     {
         $this->telefono = $telefono;
+
+        return $this;
+    }
+
+    public function getDireccion(): ?string
+    {
+        return $this->direccion;
+    }
+
+    public function setDireccion(?string $direccion): static
+    {
+        $this->direccion = $direccion;
+
+        return $this;
+    }
+
+    public function isActivo(): bool
+    {
+        return $this->activo;
+    }
+
+    public function setActivo(bool $activo): static
+    {
+        $this->activo = $activo;
 
         return $this;
     }

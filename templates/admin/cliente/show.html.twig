@@ -1,0 +1,107 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ cliente.nombre }} {{ cliente.apellido }} | Clientes | PeluCan{% endblock %}
+
+{% block body %}
+    {% include 'admin/components/_navbar.html.twig' %}
+
+    <div class="min-h-screen md:pl-64">
+        {% set display_name = (app.user.nombre ~ ' ' ~ app.user.apellido)|trim %}
+        <header class="flex h-16 items-center justify-between border-b border-(--color-border) bg-(--color-surface) px-4 sm:px-5 md:px-8">
+            <a href="{{ path('app_cliente_index') }}" class="inline-flex items-center gap-2 text-sm font-medium text-(--color-text-secondary) transition hover:text-(--color-brand)">
+                <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+                Volver a clientes
+            </a>
+            <span class="hidden text-sm font-semibold text-(--color-text-primary) sm:block">{{ display_name }}</span>
+        </header>
+
+        <main class="w-full px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-9 2xl:px-12">
+            <div class="mb-6 flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+                <div class="flex min-w-0 items-center gap-4">
+                    <span class="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-(--color-brand-soft) text-xl font-bold text-(--color-brand)">{{ cliente.nombre|slice(0, 1)|upper }}{{ cliente.apellido|slice(0, 1)|upper }}</span>
+                    <div class="min-w-0">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <h1 class="text-2xl font-bold text-(--color-text-primary) sm:text-3xl">{{ cliente.nombre }} {{ cliente.apellido }}</h1>
+                            <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold {% if cliente.activo %}bg-(--color-success-soft) text-(--color-success){% else %}bg-(--color-danger-soft) text-(--color-danger){% endif %}"><span aria-hidden="true" class="h-1.5 w-1.5 rounded-full {% if cliente.activo %}bg-(--color-success){% else %}bg-(--color-danger){% endif %}"></span>{{ cliente.activo ? 'Activo' : 'Suspendido' }}</span>
+                        </div>
+                        <p class="mt-1 truncate text-sm text-(--color-text-secondary)">{{ cliente.email }}</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ path('app_cliente_edit', {id: cliente.id, estado: 'todos'}) }}" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-(--radius-control) border border-(--color-border) bg-(--color-surface) px-4 text-sm font-semibold text-(--color-text-primary) transition hover:bg-(--color-surface-muted)">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><path d="m14 5 5 5M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z"/></svg>Editar
+                    </a>
+                    <a href="{{ path('app_mascota_new', {clienteId: cliente.id}) }}" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-(--radius-control) bg-(--button-primary-background) px-4 text-sm font-semibold text-(--button-primary-text) transition hover:bg-(--button-primary-hover)">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Añadir mascota
+                    </a>
+                    {{ include('admin/cliente/_status_form.html.twig', {cliente: cliente, estadoFiltro: 'todos'}) }}
+                </div>
+            </div>
+
+            <div class="grid gap-5 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+                <section aria-labelledby="cliente-contacto-title" class="overflow-hidden rounded-(--radius-panel) border border-(--color-border) bg-(--color-surface) shadow-(--shadow-panel)">
+                    <div class="border-b border-(--color-border) px-5 py-4 sm:px-6">
+                        <h2 id="cliente-contacto-title" class="text-lg font-semibold text-(--color-text-primary)">Datos de contacto</h2>
+                        <p class="mt-1 text-sm text-(--color-text-secondary)">Cliente desde {{ cliente.createdAt ? cliente.createdAt|date('d/m/Y') : 'fecha no registrada' }}</p>
+                    </div>
+                    <dl class="grid gap-x-6 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+                        <div class="border-b border-(--color-border) px-5 py-4 sm:px-6"><dt class="text-xs font-medium text-(--color-text-muted)">Nombre</dt><dd class="mt-1 font-medium text-(--color-text-primary)">{{ cliente.nombre }}</dd></div>
+                        <div class="border-b border-(--color-border) px-5 py-4 sm:px-6"><dt class="text-xs font-medium text-(--color-text-muted)">Apellidos</dt><dd class="mt-1 font-medium text-(--color-text-primary)">{{ cliente.apellido }}</dd></div>
+                        <div class="border-b border-(--color-border) px-5 py-4 sm:col-span-2 sm:px-6 xl:col-span-1 2xl:col-span-2"><dt class="text-xs font-medium text-(--color-text-muted)">Correo electrónico</dt><dd class="mt-1 break-all font-medium text-(--color-text-primary)"><a href="mailto:{{ cliente.email }}" class="transition hover:text-(--color-brand)">{{ cliente.email }}</a></dd></div>
+                        <div class="border-b border-(--color-border) px-5 py-4 sm:px-6"><dt class="text-xs font-medium text-(--color-text-muted)">Teléfono</dt><dd class="mt-1 font-medium text-(--color-text-primary)"><a href="tel:{{ cliente.telefono }}" class="transition hover:text-(--color-brand)">{{ cliente.telefono }}</a></dd></div>
+                        <div class="px-5 py-4 sm:px-6"><dt class="text-xs font-medium text-(--color-text-muted)">Dirección</dt><dd class="mt-1 whitespace-pre-line font-medium text-(--color-text-primary)">{{ cliente.direccion ?: 'Sin dirección registrada' }}</dd></div>
+                    </dl>
+                </section>
+
+                <section aria-labelledby="cliente-mascotas-title" class="overflow-hidden rounded-(--radius-panel) border border-(--color-border) bg-(--color-surface) shadow-(--shadow-panel)">
+                    <div class="flex items-center justify-between gap-3 border-b border-(--color-border) px-5 py-4 sm:px-6">
+                        <div><h2 id="cliente-mascotas-title" class="text-lg font-semibold text-(--color-text-primary)">Mascotas asociadas</h2><p class="mt-1 text-sm text-(--color-text-secondary)">{{ cliente.mascotas|length }} mascotas</p></div>
+                        <span class="grid h-10 w-10 shrink-0 place-items-center rounded-(--radius-control) bg-(--color-brand-soft) text-(--color-brand)"><svg aria-hidden="true" viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor"><path d="M12 13c-2.8-2.6-6.5-1-6.5 2.4 0 2.4 2 4.6 4.2 4.6 1 0 1.7-.5 2.3-1.2.6.7 1.3 1.2 2.3 1.2 2.2 0 4.2-2.2 4.2-4.6 0-3.4-3.7-5-6.5-2.4Z"/><circle cx="6" cy="7" r="1.5"/><circle cx="10" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="19" cy="8" r="1.5"/></svg></span>
+                    </div>
+                    {% if cliente.mascotas is not empty %}
+                        <div class="grid gap-3 p-4 sm:grid-cols-2 sm:p-5">
+                            {% for mascota in cliente.mascotas %}
+                                <article class="flex min-w-0 items-center gap-3 rounded-(--radius-control) border border-(--color-border) p-3 transition hover:border-(--focus-ring)">
+                                    {% if mascota.foto %}
+                                        <img src="{{ asset(mascota.foto) }}" alt="Foto de {{ mascota.nombre }}" class="h-14 w-14 shrink-0 rounded-(--radius-control) object-cover">
+                                    {% else %}
+                                        <span class="grid h-14 w-14 shrink-0 place-items-center rounded-(--radius-control) bg-(--color-brand-soft) text-(--color-brand)"><svg aria-hidden="true" viewBox="0 0 24 24" class="h-7 w-7" fill="currentColor"><path d="M12 13c-2.8-2.6-6.5-1-6.5 2.4 0 2.4 2 4.6 4.2 4.6 1 0 1.7-.5 2.3-1.2.6.7 1.3 1.2 2.3 1.2 2.2 0 4.2-2.2 4.2-4.6-0-3.4-3.7-5-6.5-2.4Z"/><circle cx="6" cy="7" r="1.5"/><circle cx="10" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="19" cy="8" r="1.5"/></svg></span>
+                                    {% endif %}
+                                    <div class="min-w-0 flex-1"><p class="truncate font-semibold text-(--color-text-primary)">{{ mascota.nombre }}</p><p class="truncate text-xs text-(--color-text-secondary)">{{ mascota.raza }}</p><a href="{{ path('app_mascota_show', {id: mascota.id}) }}" class="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-(--color-brand) hover:text-(--color-brand-hover)">Ver ficha<svg aria-hidden="true" viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a></div>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="px-5 py-10 text-center sm:px-6"><p class="font-medium text-(--color-text-primary)">Sin mascotas asociadas</p><p class="mt-1 text-sm text-(--color-text-secondary)">Las nuevas mascotas se podrán vincular desde su formulario.</p></div>
+                    {% endif %}
+                </section>
+            </div>
+
+            <section aria-labelledby="cliente-citas-title" class="mt-5 overflow-hidden rounded-(--radius-panel) border border-(--color-border) bg-(--color-surface) shadow-(--shadow-panel)">
+                <div class="flex items-center justify-between gap-3 border-b border-(--color-border) px-5 py-4 sm:px-6">
+                    <div><h2 id="cliente-citas-title" class="text-lg font-semibold text-(--color-text-primary)">Citas e historial</h2><p class="mt-1 text-sm text-(--color-text-secondary)">Citas de las mascotas de {{ cliente.nombre }}.</p></div>
+                    <span class="rounded-full bg-(--color-brand-soft) px-3 py-1 text-xs font-semibold text-(--color-brand)">{{ citas|length }} citas</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-190 border-collapse text-left text-sm">
+                        <thead class="bg-(--color-surface-muted) text-xs font-semibold text-(--color-text-secondary)"><tr><th scope="col" class="px-5 py-3">Fecha y hora</th><th scope="col" class="px-4 py-3">Mascota</th><th scope="col" class="px-4 py-3">Servicios</th><th scope="col" class="px-4 py-3">Estado</th><th scope="col" class="px-5 py-3">Responsable</th></tr></thead>
+                        <tbody class="divide-y divide-(--color-border)">
+                            {% for cita in citas %}
+                                {% set estado = cita.estado|lower %}
+                                <tr class="transition hover:bg-(--color-surface-muted)">
+                                    <td class="whitespace-nowrap px-5 py-4 font-medium text-(--color-text-primary)">{{ cita.inicio ? cita.inicio|date('d/m/Y H:i') : 'Fecha pendiente' }}</td>
+                                    <td class="px-4 py-4"><a href="{{ path('app_mascota_show', {id: cita.mascota.id}) }}" class="font-medium text-(--color-brand) hover:text-(--color-brand-hover)">{{ cita.mascota.nombre }}</a></td>
+                                    <td class="px-4 py-4 text-(--color-text-secondary)">{% if cita.citaServicios is not empty %}{% for citaServicio in cita.citaServicios %}{% if not loop.first %}, {% endif %}{{ citaServicio.servicio.nombre }}{% endfor %}{% else %}Sin servicios detallados{% endif %}</td>
+                                    <td class="px-4 py-4"><span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {% if estado in ['confirmada', 'realizada'] %}bg-(--color-success-soft) text-(--color-success){% elseif estado == 'cancelada' %}bg-(--color-danger-soft) text-(--color-danger){% else %}bg-(--color-warning-soft) text-(--color-warning){% endif %}">{{ cita.estado }}</span></td>
+                                    <td class="whitespace-nowrap px-5 py-4 text-(--color-text-secondary)">{{ cita.trabajador ? (cita.trabajador.nombre ~ ' ' ~ cita.trabajador.apellido)|trim : 'Sin asignar' }}</td>
+                                </tr>
+                            {% else %}
+                                <tr><td colspan="5" class="px-5 py-12 text-center text-sm text-(--color-text-secondary)">No hay citas registradas para sus mascotas.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+{% endblock %}

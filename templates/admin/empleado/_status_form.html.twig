@@ -1,0 +1,10 @@
+<form data-admin-status-form method="post" action="{{ path('app_empleado_toggle_status', {id: empleado.id, estado: estadoFiltro}) }}" onsubmit="return confirm('¿Quieres cambiar el estado de este empleado?');">
+    <input type="hidden" name="_token" value="{{ csrf_token('toggle-empleado-' ~ empleado.id) }}">
+    <button type="submit" aria-label="{{ empleado.activo ? 'Suspender a ' ~ empleado.nombre : 'Reactivar a ' ~ empleado.nombre }}" title="{{ empleado.activo ? 'Suspender' : 'Reactivar' }}" class="grid h-9 w-9 place-items-center rounded-(--radius-control) transition {% if empleado.activo %}bg-(--color-danger-soft) text-(--color-danger) hover:bg-(--color-danger) hover:text-white{% else %}bg-(--color-success-soft) text-(--color-success) hover:bg-(--color-success) hover:text-white{% endif %}">
+        {% if empleado.activo %}
+            <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg>
+        {% else %}
+            <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><path d="M8 11V7a4 4 0 0 1 7.7-1.5M5 10h14v11H5zM12 14v3m-9-9 18 12"/></svg>
+        {% endif %}
+    </button>
+</form>

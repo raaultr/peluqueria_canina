@@ -49,6 +49,24 @@ final class AppFixtures extends Fixture
             $clients[$email] = $client;
         }
 
+        $employeeData = [
+            ['Carmen', 'Vega', 'carmen.vega@pelucan.test', '600000010'],
+            ['Mateo', 'Rios', 'mateo.rios@pelucan.test', '600000011'],
+            ['Lucia', 'Martin', 'lucia.martin@pelucan.test', '600000012'],
+        ];
+        $employees = [];
+
+        foreach ($employeeData as [$firstName, $lastName, $email, $phone]) {
+            $employee = $userRepository->findOneBy(['email' => $email]);
+
+            if (!$employee) {
+                $employee = $this->createUser($email, $firstName, $lastName, $phone, ['ROLE_EMPLEADO']);
+                $manager->persist($employee);
+            }
+
+            $employees[$email] = $employee;
+        }
+
         $petData = [
             ['Luna', 'Golden Retriever', 'Hembra', '2021-06-14', 28.4, 'Grande', 'ana.torres@pelucan.test'],
             ['Max', 'Bulldog Frances', 'Macho', '2022-10-04', 12.6, 'Mediano', 'ana.torres@pelucan.test'],
@@ -138,6 +156,41 @@ final class AppFixtures extends Fixture
                 ->setNotas('Cita de demostración')
                 ->setCreatedAt(new \DateTimeImmutable())
                 ->setTrabajador($admin)
+                ->setMascota($mascota);
+            $manager->persist($cita);
+
+            $citaServicio = (new CitaServicio())
+                ->setPrecioAplicado('35.00')
+                ->setDuracionAplicada($services[$serviceName]->getDuracionMins())
+                ->setCita($cita)
+                ->setServicio($services[$serviceName]);
+            $manager->persist($citaServicio);
+        }
+
+        $employeeAppointmentData = [
+            ['Rocky', '2026-11-08 10:00', '2026-11-08 10:45', 'Confirmada', 'Corte higiénico', 'carmen.vega@pelucan.test'],
+            ['Bruno', '2026-11-09 12:00', '2026-11-09 13:15', 'Pendiente', 'Corte de raza', 'mateo.rios@pelucan.test'],
+            ['Lola', '2026-11-10 09:30', '2026-11-10 10:20', 'Confirmada', 'Deslanado', 'lucia.martin@pelucan.test'],
+        ];
+
+        foreach ($employeeAppointmentData as [$petName, $start, $end, $status, $serviceName, $employeeEmail]) {
+            $mascota = $mascotaRepository->findOneBy(['nombre' => $petName]);
+            if (!$mascota) {
+                continue;
+            }
+
+            $startAt = new \DateTime($start);
+            if ($citaRepository->findOneBy(['mascota' => $mascota, 'inicio' => $startAt])) {
+                continue;
+            }
+
+            $cita = (new Cita())
+                ->setInicio($startAt)
+                ->setFin(new \DateTime($end))
+                ->setEstado($status)
+                ->setNotas('Cita de demostración para el equipo.')
+                ->setCreatedAt(new \DateTimeImmutable())
+                ->setTrabajador($employees[$employeeEmail])
                 ->setMascota($mascota);
             $manager->persist($cita);
 
