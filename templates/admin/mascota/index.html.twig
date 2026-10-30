@@ -1,53 +1,215 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mascota index{% endblock %}
+{% block title %}Mascotas | PeluCan{% endblock %}
 
 {% block body %}
-    <h1>Mascota index</h1>
+    {% include 'admin/components/_navbar.html.twig' %}
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Nombre</th>
-                <th>Raza</th>
-                <th>Sexo</th>
-                <th>FechaNacimiento</th>
-                <th>Peso</th>
-                <th>Tamano</th>
-                <th>Foto</th>
-                <th>Nota</th>
-                <th>CreatedAt</th>
-                <th>UpdatedAt</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for mascotum in mascotas %}
-            <tr>
-                <td>{{ mascotum.id }}</td>
-                <td>{{ mascotum.nombre }}</td>
-                <td>{{ mascotum.raza }}</td>
-                <td>{{ mascotum.sexo }}</td>
-                <td>{{ mascotum.fechaNacimiento ? mascotum.fechaNacimiento|date('Y-m-d') : '' }}</td>
-                <td>{{ mascotum.peso }}</td>
-                <td>{{ mascotum.tamano }}</td>
-                <td>{{ mascotum.foto }}</td>
-                <td>{{ mascotum.nota }}</td>
-                <td>{{ mascotum.createdAt ? mascotum.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ mascotum.updatedAt ? mascotum.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>
-                    <a href="{{ path('app_mascota_show', {'id': mascotum.id}) }}">show</a>
-                    <a href="{{ path('app_mascota_edit', {'id': mascotum.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="12">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    {% set razas = [] %}
+    {% set sexos = [] %}
+    {% set tamanos = [] %}
+    {% set mascotasConFoto = 0 %}
+    {% set pesoTotal = 0 %}
+    {% set mascotasConPeso = 0 %}
+    {% for mascota in mascotas %}
+        {% if mascota.raza and mascota.raza not in razas %}
+            {% set razas = razas|merge([mascota.raza]) %}
+        {% endif %}
+        {% if mascota.sexo and mascota.sexo not in sexos %}
+            {% set sexos = sexos|merge([mascota.sexo]) %}
+        {% endif %}
+        {% if mascota.tamano and mascota.tamano not in tamanos %}
+            {% set tamanos = tamanos|merge([mascota.tamano]) %}
+        {% endif %}
+        {% if mascota.foto %}
+            {% set mascotasConFoto = mascotasConFoto + 1 %}
+        {% endif %}
+        {% if mascota.peso is not null %}
+            {% set pesoTotal = pesoTotal + mascota.peso %}
+            {% set mascotasConPeso = mascotasConPeso + 1 %}
+        {% endif %}
+    {% endfor %}
 
-    <a href="{{ path('app_mascota_new') }}">Create new</a>
+    <div class="min-h-screen md:pl-64">
+        {% set display_name = (app.user.nombre ~ ' ' ~ app.user.apellido)|trim %}
+        {% set user_role = 'ROLE_ADMIN' in app.user.roles ? 'Administrador' : 'Empleado' %}
+        <header class="flex h-16 items-center justify-end border-b border-(--color-border) bg-(--color-surface) px-4 sm:px-5 md:px-8">
+            <div class="hidden items-center gap-3 md:flex">
+                <span class="text-right">
+                    <span class="block text-sm font-semibold text-(--color-text-primary)">{{ display_name }}</span>
+                    <span class="block text-xs text-(--color-text-secondary)">{{ user_role }}</span>
+                </span>
+                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-(--color-brand-soft) text-sm font-bold text-(--color-brand)" role="img" aria-label="Avatar de {{ display_name }}">{{ display_name|slice(0, 1)|upper }}</span>
+            </div>
+        </header>
+
+        <main data-mascotas-view class="w-full px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-9 2xl:px-12">
+            <div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                <div>
+                    <h1 class="flex items-center gap-3 text-2xl font-bold text-(--color-text-primary) sm:text-3xl">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" class="h-7 w-7 text-(--color-brand)" fill="currentColor"><path d="M12 13c-2.8-2.6-6.5-1-6.5 2.4 0 2.4 2 4.6 4.2 4.6 1 0 1.7-.5 2.3-1.2.6.7 1.3 1.2 2.3 1.2 2.2 0 4.2-2.2 4.2-4.6 0-3.4-3.7-5-6.5-2.4Z"/><circle cx="6" cy="7" r="1.5"/><circle cx="10" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="19" cy="8" r="1.5"/></svg>
+                        Mascotas
+                    </h1>
+                    <p class="mt-1 text-sm text-(--color-text-secondary)">Consulta y gestiona las mascotas registradas en la peluquería.</p>
+                </div>
+                <a href="{{ path('app_mascota_new') }}" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-(--radius-control) bg-(--button-primary-background) px-4 py-2 text-sm font-semibold text-(--button-primary-text) shadow-(--shadow-panel) transition hover:bg-(--button-primary-hover)">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                    Nueva mascota
+                </a>
+            </div>
+
+            <section aria-label="Resumen de mascotas" class="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <article class="flex items-center gap-3 rounded-(--radius-panel) border border-(--color-border) bg-(--color-surface) p-4 shadow-(--shadow-panel)">
+                    <span class="grid h-11 w-11 shrink-0 place-items-center rounded-(--radius-control) bg-(--color-brand-soft) text-(--color-brand)">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" class="h-6 w-6" fill="currentColor"><path d="M12 13c-2.8-2.6-6.5-1-6.5 2.4 0 2.4 2 4.6 4.2 4.6 1 0 1.7-.5 2.3-1.2.6.7 1.3 1.2 2.3 1.2 2.2 0 4.2-2.2 4.2-4.6 0-3.4-3.7-5-6.5-2.4Z"/><circle cx="6" cy="7" r="1.5"/><circle cx="10" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="19" cy="8" r="1.5"/></svg>
+                    </span>
+                    <div><p class="text-xs font-medium text-(--color-text-secondary)">Total de mascotas</p><p class="mt-1 text-xl font-bold text-(--color-text-primary)">{{ mascotas|length }}</p></div>
+                </article>
+                <article class="flex items-center gap-3 rounded-(--radius-panel) border border-(--color-border) bg-(--color-surface) p-4 shadow-(--shadow-panel)">
+                    <span class="grid h-11 w-11 shrink-0 place-items-center rounded-(--radius-control) bg-(--color-success-soft) text-(--color-success)">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><path d="M7 11 5.5 8.5a1.5 1.5 0 0 1 2.6-1.5L10 9m7 2 1.5-2.5a1.5 1.5 0 0 0-2.6-1.5L14 9"/><path d="M6 12a6 6 0 0 1 12 0v5a2 2 0 0 1-2 2h-1v-4h-6v4H8a2 2 0 0 1-2-2z"/><path d="M12 9v2m-3 1h.01M15 12h.01"/></svg>
+                    </span>
+                    <div><p class="text-xs font-medium text-(--color-text-secondary)">Razas registradas</p><p class="mt-1 text-xl font-bold text-(--color-text-primary)">{{ razas|length }}</p></div>
+                </article>
+                <article class="flex items-center gap-3 rounded-(--radius-panel) border border-(--color-border) bg-(--color-surface) p-4 shadow-(--shadow-panel)">
+                    <span class="grid h-11 w-11 shrink-0 place-items-center rounded-(--radius-control) bg-(--color-brand-soft) text-(--color-brand)">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></svg>
+                    </span>
+                    <div><p class="text-xs font-medium text-(--color-text-secondary)">Con fotografía</p><p class="mt-1 text-xl font-bold text-(--color-text-primary)">{{ mascotasConFoto }}</p></div>
+                </article>
+                <article class="flex items-center gap-3 rounded-(--radius-panel) border border-(--color-border) bg-(--color-surface) p-4 shadow-(--shadow-panel)">
+                    <span class="grid h-11 w-11 shrink-0 place-items-center rounded-(--radius-control) bg-(--color-danger-soft) text-(--color-danger)">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/><path d="M8 12h2l1-2 2 4 1-2h2"/></svg>
+                    </span>
+                    <div><p class="text-xs font-medium text-(--color-text-secondary)">Peso medio</p><p class="mt-1 text-xl font-bold text-(--color-text-primary)">{{ mascotasConPeso > 0 ? (pesoTotal / mascotasConPeso)|number_format(1, ',', '.') ~ ' kg' : 'Sin datos' }}</p></div>
+                </article>
+            </section>
+
+            <section aria-label="Listado de mascotas" class="overflow-hidden rounded-(--radius-panel) border border-(--color-border) bg-(--color-surface) shadow-(--shadow-panel)">
+                <div class="flex flex-col gap-3 border-b border-(--color-border) p-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div class="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row">
+                        <label class="relative block min-w-0 flex-1">
+                            <span class="sr-only">Buscar mascotas</span>
+                            <svg aria-hidden="true" viewBox="0 0 24 24" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-(--color-text-muted)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4 4"/></svg>
+                            <input type="search" data-mascotas-search placeholder="Buscar por nombre, raza o cliente..." class="h-10 w-full rounded-(--radius-control) border border-(--color-border) bg-(--color-surface) pl-9 pr-3 text-sm text-(--color-text-primary) outline-none transition placeholder:text-(--color-text-muted) focus:border-(--color-brand) focus:ring-2 focus:ring-(--focus-ring)/30">
+                        </label>
+                        <button type="button" data-mascotas-filters-toggle aria-controls="mascotas-filters" aria-expanded="false" class="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-(--radius-control) border border-(--color-border) bg-(--color-surface) px-4 text-sm font-medium text-(--color-text-secondary) transition hover:border-(--color-brand) hover:bg-(--color-brand-soft) hover:text-(--color-brand)">
+                            <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><path d="M4 5h16l-6.5 7.5v5l-3 1.5v-6.5L4 5Z"/></svg>
+                            Filtros
+                            <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4 transition-transform" data-mascotas-filter-chevron fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><path d="m7 10 5 5 5-5"/></svg>
+                        </button>
+                    </div>
+                    <p class="text-sm text-(--color-text-secondary) lg:text-right" aria-live="polite" data-mascotas-count>Mostrando {{ mascotas|length }} mascotas</p>
+                </div>
+
+                <div id="mascotas-filters" data-mascotas-filters-panel hidden class="grid gap-3 border-b border-(--color-border) bg-(--color-surface-muted) p-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <label class="grid gap-1.5 text-xs font-semibold text-(--color-text-secondary)">
+                        Sexo
+                        <select data-mascotas-filter="sexo" class="h-10 w-full rounded-(--radius-control) border border-(--color-border) bg-(--color-surface) px-3 text-sm font-normal text-(--color-text-primary) outline-none focus:border-(--color-brand) focus:ring-2 focus:ring-(--focus-ring)/30">
+                            <option value="">Todos</option>
+                            {% for sexo in sexos %}<option value="{{ sexo|lower }}">{{ sexo }}</option>{% endfor %}
+                        </select>
+                    </label>
+                    <label class="grid gap-1.5 text-xs font-semibold text-(--color-text-secondary)">
+                        Tamaño
+                        <select data-mascotas-filter="tamano" class="h-10 w-full rounded-(--radius-control) border border-(--color-border) bg-(--color-surface) px-3 text-sm font-normal text-(--color-text-primary) outline-none focus:border-(--color-brand) focus:ring-2 focus:ring-(--focus-ring)/30">
+                            <option value="">Todos</option>
+                            {% for tamano in tamanos %}<option value="{{ tamano|lower }}">{{ tamano }}</option>{% endfor %}
+                        </select>
+                    </label>
+                    <label class="grid gap-1.5 text-xs font-semibold text-(--color-text-secondary)">
+                        Fotografía
+                        <select data-mascotas-filter="foto" class="h-10 w-full rounded-(--radius-control) border border-(--color-border) bg-(--color-surface) px-3 text-sm font-normal text-(--color-text-primary) outline-none focus:border-(--color-brand) focus:ring-2 focus:ring-(--focus-ring)/30">
+                            <option value="">Todas</option>
+                            <option value="si">Con fotografía</option>
+                            <option value="no">Sin fotografía</option>
+                        </select>
+                    </label>
+                    <div class="flex items-end sm:col-span-2 xl:col-span-1">
+                        <button type="button" data-mascotas-reset class="h-10 w-full rounded-(--radius-control) px-3 text-sm font-semibold text-(--color-brand) transition hover:bg-(--color-brand-soft)">Limpiar filtros</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[760px] border-collapse text-left text-sm">
+                        <thead class="bg-(--color-surface-muted) text-xs font-semibold text-(--color-text-secondary)">
+                            <tr>
+                                <th scope="col" class="px-5 py-3">Mascota</th>
+                                <th scope="col" class="px-4 py-3">Raza</th>
+                                <th scope="col" class="px-4 py-3">Cliente</th>
+                                <th scope="col" class="px-4 py-3">Sexo</th>
+                                <th scope="col" class="px-4 py-3">Tamaño</th>
+                                <th scope="col" class="px-4 py-3">Peso</th>
+                                <th scope="col" class="px-5 py-3 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-(--color-border)" data-mascotas-table>
+                            {% for mascota in mascotas %}
+                                <tr data-mascota-row data-mascota-sexo="{{ (mascota.sexo ?: '')|lower }}" data-mascota-tamano="{{ mascota.tamano|lower }}" data-mascota-foto="{{ mascota.foto ? 'si' : 'no' }}" class="transition hover:bg-(--color-brand-soft)/40">
+                                    <td class="px-5 py-3">
+                                        <div class="flex items-center gap-3">
+                                            {% if mascota.foto %}
+                                                <img src="{{ asset(mascota.foto) }}" alt="Foto de {{ mascota.nombre }}" class="h-10 w-10 shrink-0 rounded-full border border-(--color-border) object-cover">
+                                            {% else %}
+                                                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-(--color-brand-soft) text-(--color-brand)">
+                                                    <svg aria-hidden="true" viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor"><path d="M12 13c-2.8-2.6-6.5-1-6.5 2.4 0 2.4 2 4.6 4.2 4.6 1 0 1.7-.5 2.3-1.2.6.7 1.3 1.2 2.3 1.2 2.2 0 4.2-2.2 4.2-4.6 0-3.4-3.7-5-6.5-2.4Z"/><circle cx="6" cy="7" r="1.5"/><circle cx="10" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="19" cy="8" r="1.5"/></svg>
+                                                </span>
+                                            {% endif %}
+                                            <span class="font-semibold text-(--color-text-primary)">{{ mascota.nombre }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 text-(--color-text-secondary)">{{ mascota.raza }}</td>
+                                    <td class="px-4 py-3 text-(--color-text-secondary)">{{ mascota.cliente ? (mascota.cliente.nombre ~ ' ' ~ mascota.cliente.apellido)|trim : 'Sin cliente' }}</td>
+                                    <td class="px-4 py-3">
+                                        {% set sexo = mascota.sexo|lower %}
+                                        <span class="inline-flex min-w-20 items-center justify-center rounded-full px-2.5 py-1 text-xs font-semibold {% if sexo in ['macho', 'masculino', 'm'] %}bg-(--color-brand-soft) text-(--color-brand-hover){% elseif sexo in ['hembra', 'femenino', 'f'] %}bg-(--color-danger-soft) text-(--color-danger){% else %}bg-(--color-surface-muted) text-(--color-text-secondary){% endif %}">{{ mascota.sexo ?: 'Sin indicar' }}</span>
+                                    </td>
+                                    <td class="px-4 py-3"><span class="inline-flex rounded-(--radius-control) bg-(--color-success-soft) px-2.5 py-1 text-xs font-medium text-(--color-success)">{{ mascota.tamano }}</span></td>
+                                    <td class="px-4 py-3 text-(--color-text-secondary)">{{ mascota.peso is not null ? mascota.peso|number_format(1, ',', '.') ~ ' kg' : '—' }}</td>
+                                    <td class="px-5 py-3">
+                                        <div class="flex justify-end gap-1">
+                                            <a href="{{ path('app_mascota_show', {'id': mascota.id}) }}" aria-label="Ver ficha de {{ mascota.nombre }}" title="Ver ficha" class="grid h-9 w-9 place-items-center rounded-(--radius-control) bg-(--color-brand-soft) text-(--color-brand) transition hover:bg-(--color-brand) hover:text-white">
+                                                <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+                                            </a>
+                                            <a href="{{ path('app_mascota_edit', {'id': mascota.id}) }}" aria-label="Editar {{ mascota.nombre }}" title="Editar" class="grid h-9 w-9 place-items-center rounded-(--radius-control) bg-(--color-warning-soft) text-(--color-warning) transition hover:bg-(--color-warning) hover:text-white">
+                                                <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><path d="m14 5 5 5M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z"/></svg>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr data-mascotas-empty><td colspan="7" class="px-5 py-12 text-center text-sm text-(--color-text-secondary)">Todavía no hay mascotas registradas.</td></tr>
+                            {% endfor %}
+                            {% if mascotas is not empty %}
+                                <tr data-mascotas-empty hidden><td colspan="7" class="px-5 py-12 text-center text-sm text-(--color-text-secondary)">No se encontraron mascotas con esa búsqueda.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+                <footer class="flex flex-col gap-3 border-t border-(--color-border) px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                    <p class="text-sm text-(--color-text-secondary)" aria-live="polite" data-mascotas-pagination-summary>Mostrando {{ mascotas|length }} mascotas</p>
+                    <div class="flex flex-wrap items-center justify-between gap-3 sm:justify-end">
+                        <label class="flex items-center gap-2 text-sm text-(--color-text-secondary)">
+                            Filas
+                            <select data-mascotas-page-size aria-label="Filas por página" class="h-9 rounded-(--radius-control) border border-(--color-border) bg-(--color-surface) px-2 text-sm text-(--color-text-primary) outline-none focus:border-(--color-brand)">
+                                <option value="10" selected>10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                            </select>
+                            por página
+                        </label>
+                        <nav aria-label="Paginación de mascotas" class="flex items-center gap-2">
+                            <button type="button" data-mascotas-previous aria-label="Página anterior" class="grid h-9 w-9 place-items-center rounded-(--radius-control) border border-(--color-border) text-(--color-text-secondary) transition hover:bg-(--color-brand-soft) hover:text-(--color-brand) disabled:cursor-not-allowed disabled:opacity-40">
+                                <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+                            </button>
+                            <span class="min-w-16 text-center text-sm font-medium text-(--color-text-primary)" aria-live="polite" data-mascotas-page-indicator>1 / 1</span>
+                            <button type="button" data-mascotas-next aria-label="Página siguiente" class="grid h-9 w-9 place-items-center rounded-(--radius-control) border border-(--color-border) text-(--color-text-secondary) transition hover:bg-(--color-brand-soft) hover:text-(--color-brand) disabled:cursor-not-allowed disabled:opacity-40">
+                                <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+                            </button>
+                        </nav>
+                    </div>
+                </footer>
+            </section>
+        </main>
+    </div>
 {% endblock %}

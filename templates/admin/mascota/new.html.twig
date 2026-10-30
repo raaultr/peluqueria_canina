@@ -1,11 +1,23 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Mascota{% endblock %}
+{% block title %}Nueva mascota | PeluCan{% endblock %}
 
 {% block body %}
-    <h1>Create new Mascota</h1>
+    {% include 'admin/components/_navbar.html.twig' %}
 
-    {{ include('mascota/_form.html.twig') }}
+    <div class="min-h-screen md:pl-64">
+        <header class="flex h-16 items-center border-b border-(--color-border) bg-(--color-surface) px-4 sm:px-5 md:px-8">
+            <a href="{{ path('app_mascota_index') }}" class="text-sm font-medium text-(--color-text-secondary) transition hover:text-(--color-brand)">← Volver a mascotas</a>
+        </header>
+        <main class="mx-auto max-w-3xl px-4 py-6 sm:px-5 sm:py-8 md:px-8">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-(--color-text-primary) sm:text-3xl">Nueva mascota</h1>
+                <p class="mt-1 text-sm text-(--color-text-secondary)">Añade los datos de la mascota y su cliente.</p>
+            </div>
+            <section class="rounded-(--radius-panel) border border-(--color-border) bg-(--color-surface) p-5 shadow-(--shadow-panel) sm:p-7">
+                {{ include('admin/mascota/_form.html.twig', { button_label: 'Guardar mascota' }) }}
+            </section>
+        </main>
+    </div>
 
-    <a href="{{ path('app_mascota_index') }}">back to list</a>
 {% endblock %}

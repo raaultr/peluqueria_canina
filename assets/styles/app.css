@@ -373,7 +373,7 @@ body {
     text-align: center;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
     .auth-page {
         padding: 0;
     }
@@ -382,21 +382,21 @@ body {
         width: 100%;
         min-height: 100svh;
         grid-template-columns: 1fr;
-        grid-template-rows: minmax(230px, 28svh) 1fr;
+        grid-template-rows: auto 1fr;
     }
 
     .auth-brand-panel {
-        min-height: 230px;
-        padding: 24px 28px;
+        min-height: 280px;
+        padding: 24px clamp(24px, 6vw, 64px);
     }
 
     .auth-brand-copy {
-        max-width: 100%;
+        max-width: 56%;
         margin-top: 20px;
     }
 
     .auth-brand-copy h1 {
-        font-size: 30px;
+        font-size: clamp(27px, 3vw, 32px);
     }
 
     .auth-brand-copy p {
@@ -405,22 +405,22 @@ body {
     }
 
     .auth-pet-image {
-        right: -4%;
-        bottom: -10%;
+        right: 2%;
+        bottom: -5%;
         left: auto;
-        width: 55%;
-        height: 88%;
+        width: min(38%, 320px);
+        height: 72%;
     }
 
     .auth-pet-backdrop {
-        right: 0;
+        right: 2%;
         bottom: 2%;
-        width: 48%;
-        height: 48%;
+        width: 38%;
+        height: 42%;
     }
 
     .auth-form-panel {
-        padding: 32px 36px 36px;
+        padding: 32px clamp(24px, 6vw, 64px) 36px;
     }
 }
 
@@ -436,12 +436,12 @@ body {
     }
 
     .auth-brand-panel {
-        min-height: 205px;
+        min-height: 250px;
         padding: 22px 22px;
     }
 
     .auth-brand-copy {
-        max-width: 100%;
+        max-width: 58%;
         margin-top: 18px;
     }
 
@@ -454,8 +454,17 @@ body {
     }
 
     .auth-pet-image {
-        bottom: -24%;
-        height: 65%;
+        right: 1%;
+        bottom: -8%;
+        width: 38%;
+        height: 66%;
+    }
+
+    .auth-pet-backdrop {
+        right: 1%;
+        bottom: 2%;
+        width: 38%;
+        height: 38%;
     }
 
     .auth-form-panel {
