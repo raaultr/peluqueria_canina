@@ -16,6 +16,23 @@ class ServicioRepository extends ServiceEntityRepository
         parent::__construct($registry, Servicio::class);
     }
 
+    /**
+     * @return list<array{0: Servicio, requestCount: int|string}>
+     */
+    public function findActiveWithRequestCounts(): array
+    {
+        return $this->createQueryBuilder('servicio')
+            ->select('servicio')
+            ->addSelect('COUNT(citaServicio.id) AS requestCount')
+            ->leftJoin('servicio.citaServicios', 'citaServicio')
+            ->andWhere('servicio.activo = :active')
+            ->setParameter('active', true)
+            ->groupBy('servicio.id')
+            ->orderBy('servicio.nombre', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return Servicio[] Returns an array of Servicio objects
 //     */

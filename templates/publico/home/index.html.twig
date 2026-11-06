@@ -57,39 +57,22 @@
                     </div>
                 </div>
                 <div class="home-price-grid">
-                    <article class="home-price-card">
-                        <div class="home-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 10h16l-1.5 10h-13L4 10Zm3 0a5 5 0 0 1 10 0M3 14h18"/></svg></div>
-                        <h3>Baño e hidratación</h3>
-                        <p>Doble enjabonado dermocosmético, mascarilla acondicionadora y cepillado profundo.</p>
-                        <div class="home-price-meta"><span>50-60 min</span><div><small>desde</small><strong data-service-price data-small="28 €" data-medium="36 €" data-large="46 €">28 €</strong></div></div>
-                        <ul><li>Champú según tipo de manto</li><li>Limpieza ótica y ocular</li><li>Corte y limado de uñas</li><li>Secado térmico controlado</li></ul>
-                        <a href="{{ path('app_login') }}">Seleccionar servicio <span aria-hidden="true">→</span></a>
-                    </article>
-                    <article class="home-price-card is-popular">
-                        <span class="home-popular-label">Más popular</span>
-                        <div class="home-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="m8 8 8 8m0-8-8 8"/></svg></div>
-                        <h3>Corte tijera y raza</h3>
-                        <p>Modelado artístico a tijera o estilismo higiénico, fiel al estándar de cada raza.</p>
-                        <div class="home-price-meta"><span>75-90 min</span><div><small>desde</small><strong data-service-price data-small="42 €" data-medium="52 €" data-large="65 €">42 €</strong></div></div>
-                        <ul><li>Incluye sesión completa de baño</li><li>Técnica a tijera especializada</li><li>Repaso de zonas higiénicas</li><li>Perfume hipoalergénico</li></ul>
-                        <a href="{{ path('app_login') }}">Reservar este servicio <span aria-hidden="true">→</span></a>
-                    </article>
-                    <article class="home-price-card">
-                        <div class="home-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20c4-1 6-5 8-10l2-5 3 2-2 5c-2 5-2 9-7 9H4Z"/><path d="m13 8 4 3M5 17l3 3"/></svg></div>
-                        <h3>Deslanado y muda</h3>
-                        <p>Eliminación minuciosa del subpelo muerto para mantos dobles y épocas de muda.</p>
-                        <div class="home-price-meta"><span>70-85 min</span><div><small>desde</small><strong data-service-price data-small="38 €" data-medium="48 €" data-large="60 €">38 €</strong></div></div>
-                        <ul><li>Carda y deslanador ergonómico</li><li>Expulsor de aire suave</li><li>Ayuda a prevenir nudos</li><li>Reduce el pelo suelto en casa</li></ul>
-                        <a href="{{ path('app_login') }}">Seleccionar servicio <span aria-hidden="true">→</span></a>
-                    </article>
-                    <article class="home-price-card">
-                        <div class="home-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1m0-12.8-2.1 2.1m-8.6 8.6-2.1 2.1"/><circle cx="12" cy="12" r="5"/></svg></div>
-                        <h3>Spa y ozonoterapia</h3>
-                        <p>Hidroterapia con microburbujas y masaje balsámico para pieles sensibles o maduras.</p>
-                        <div class="home-price-meta"><span>60-70 min</span><div><small>desde</small><strong data-service-price data-small="49 €" data-medium="59 €" data-large="72 €">49 €</strong></div></div>
-                        <ul><li>Agua purificada ozonizada</li><li>Cuidado de la piel</li><li>Masaje de relajación</li><li>Atención para pieles sensibles</li></ul>
-                        <a href="{{ path('app_login') }}">Seleccionar servicio <span aria-hidden="true">→</span></a>
-                    </article>
+                    {% for item in catalogoServicios %}
+                        {% set servicio = item.servicio %}
+                        {% set precioPequeno = item.tarifas.small is not null ? (item.tarifas.small|number_format(2, ',', '.') ~ ' €') : 'Consultar' %}
+                        {% set precioMediano = item.tarifas.medium is not null ? (item.tarifas.medium|number_format(2, ',', '.') ~ ' €') : 'Consultar' %}
+                        {% set precioGrande = item.tarifas.large is not null ? (item.tarifas.large|number_format(2, ',', '.') ~ ' €') : 'Consultar' %}
+                        <article class="home-price-card{% if item.popular %} is-popular{% endif %}">
+                            {% if item.popular %}<span class="home-popular-label">Más popular</span>{% endif %}
+                            <div class="home-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 10h16l-1.5 10h-13L4 10Zm3 0a5 5 0 0 1 10 0M3 14h18"/></svg></div>
+                            <h3>{{ servicio.nombre }}</h3>
+                            <p>{{ servicio.descripcion ?: 'Servicio de peluquería adaptado a las necesidades de tu mascota.' }}</p>
+                            <div class="home-price-meta"><span class="home-service-duration"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>{% if servicio.duracionMins %}{{ servicio.duracionMins }} min{% else %}Duración a consultar{% endif %}</span></span><div><small>desde</small><strong data-service-price data-small="{{ precioPequeno }}" data-medium="{{ precioMediano }}" data-large="{{ precioGrande }}">{{ precioPequeno }}</strong></div></div>
+                            <a href="{{ path('app_login') }}">Solicitar cita <span aria-hidden="true">→</span></a>
+                        </article>
+                    {% else %}
+                        <p class="home-empty-catalog">No hay servicios disponibles en este momento.</p>
+                    {% endfor %}
                 </div>
             </div>
         </section>

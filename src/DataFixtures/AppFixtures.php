@@ -2,11 +2,16 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\Mascota;
 use App\Entity\Cita;
 use App\Entity\CitaServicio;
+use App\Entity\Mascota;
+use App\Entity\Pago;
+use App\Entity\Producto;
 use App\Entity\Servicio;
+use App\Entity\ServicioTarifa;
 use App\Entity\User;
+use App\Entity\Venta;
+use App\Entity\VentaDetalles;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -70,10 +75,10 @@ final class AppFixtures extends Fixture
         $petData = [
             ['Luna', 'Golden Retriever', 'Hembra', '2021-06-14', 28.4, 'Grande', 'ana.torres@pelucan.test'],
             ['Max', 'Bulldog Frances', 'Macho', '2022-10-04', 12.6, 'Mediano', 'ana.torres@pelucan.test'],
-            ['Nala', 'Siamés', 'Hembra', '2023-02-11', 4.1, 'Pequeño', 'carlos.ruiz@pelucan.test'],
+            ['Nala', 'Caniche Toy', 'Hembra', '2023-02-11', 4.1, 'Pequeño', 'carlos.ruiz@pelucan.test'],
             ['Rocky', 'Border Collie', 'Macho', '2020-08-19', 21.3, 'Grande', 'carlos.ruiz@pelucan.test'],
             ['Bella', 'Cocker Spaniel', 'Hembra', '2019-12-02', 13.0, 'Mediano', 'sofia.ramirez@pelucan.test'],
-            ['Toby', 'Maine Coon', 'Macho', '2023-04-22', 6.8, 'Mediano', 'sofia.ramirez@pelucan.test'],
+            ['Toby', 'Cocker Spaniel', 'Macho', '2023-04-22', 6.8, 'Mediano', 'sofia.ramirez@pelucan.test'],
             ['Kira', 'Labrador Retriever', 'Hembra', '2022-01-30', 25.7, 'Grande', 'diego.mendoza@pelucan.test'],
             ['Bruno', 'Beagle', 'Macho', '2021-09-07', 14.8, 'Mediano', 'diego.mendoza@pelucan.test'],
             ['Coco', 'Chihuahua', 'Hembra', '2024-03-16', 2.4, 'Pequeño', 'valentina.cruz@pelucan.test'],
@@ -82,49 +87,69 @@ final class AppFixtures extends Fixture
             ['Lola', 'Caniche Toy', 'Hembra', '2024-07-03', 3.2, 'Pequeño', 'lucia.fernandez@pelucan.test'],
         ];
         $mascotaRepository = $manager->getRepository(Mascota::class);
+        $mascotas = [];
 
         foreach ($petData as [$name, $breed, $sex, $birthday, $weight, $size, $clientEmail]) {
             $client = $clients[$clientEmail];
-            if ($mascotaRepository->findOneBy(['nombre' => $name, 'cliente' => $client])) {
-                continue;
+            $mascota = $mascotaRepository->findOneBy(['nombre' => $name, 'cliente' => $client]);
+
+            if (!$mascota) {
+                $mascota = (new Mascota())->setCreatedAt(new \DateTimeImmutable());
+                $manager->persist($mascota);
             }
 
-            $mascota = (new Mascota())
+            $mascota
                 ->setNombre($name)
                 ->setRaza($breed)
                 ->setSexo($sex)
                 ->setFechaNacimiento(new \DateTime($birthday))
                 ->setPeso($weight)
                 ->setTamano($size)
-                ->setCreatedAt(new \DateTimeImmutable())
                 ->setCliente($client);
-
-            $manager->persist($mascota);
+            $mascotas[$name] = $mascota;
         }
 
         $serviceData = [
-            ['Baño y secado', 'Baño completo con secado y cepillado.', 60],
-            ['Corte higiénico', 'Aseo de zonas sensibles y repaso de uñas.', 35],
-            ['Corte de raza', 'Corte adaptado a la raza y tipo de pelaje.', 75],
-            ['Deslanado', 'Retirada de pelo muerto y cepillado profundo.', 50],
+            ['Baño y secado', 'Baño completo con secado y cepillado.', 60, ['Pequeño' => '28.00', 'Mediano' => '36.00', 'Grande' => '46.00']],
+            ['Corte higiénico', 'Aseo de zonas sensibles y repaso de uñas.', 35, ['Pequeño' => '18.00', 'Mediano' => '25.00', 'Grande' => '32.00']],
+            ['Corte de raza', 'Corte adaptado a la raza y tipo de pelaje.', 75, ['Pequeño' => '42.00', 'Mediano' => '52.00', 'Grande' => '65.00']],
+            ['Deslanado', 'Retirada de pelo muerto y cepillado profundo.', 50, ['Pequeño' => '38.00', 'Mediano' => '48.00', 'Grande' => '60.00']],
         ];
         $serviceRepository = $manager->getRepository(Servicio::class);
+        $serviceTariffRepository = $manager->getRepository(ServicioTarifa::class);
         $services = [];
+        $servicePrices = [];
 
-        foreach ($serviceData as [$name, $description, $duration]) {
+        foreach ($serviceData as [$name, $description, $duration, $prices]) {
             $service = $serviceRepository->findOneBy(['nombre' => $name]);
 
             if (!$service) {
-                $service = (new Servicio())
-                    ->setNombre($name)
-                    ->setDescripcion($description)
-                    ->setDuracionMins($duration)
-                    ->setActivo(true)
-                    ->setCreatedAt(new \DateTimeImmutable());
+                $service = (new Servicio())->setCreatedAt(new \DateTimeImmutable());
                 $manager->persist($service);
             }
 
+            $service
+                ->setNombre($name)
+                ->setDescripcion($description)
+                ->setDuracionMins($duration)
+                ->setActivo(true);
             $services[$name] = $service;
+            $servicePrices[$name] = $prices;
+
+            foreach ($prices as $size => $price) {
+                $tarifa = $service->getId() === null
+                    ? null
+                    : $serviceTariffRepository->findOneBy(['servicio' => $service, 'tamano' => $size]);
+
+                if (!$tarifa) {
+                    $tarifa = (new ServicioTarifa())
+                        ->setServicio($service)
+                        ->setTamano($size);
+                    $manager->persist($tarifa);
+                }
+
+                $tarifa->setPrecio($price);
+            }
         }
 
         $appointmentData = [
@@ -135,36 +160,58 @@ final class AppFixtures extends Fixture
             ['Kira', '2026-10-20 11:00', '2026-10-20 12:00', 'Realizada', 'Baño y secado'],
             ['Coco', '2026-11-06 15:00', '2026-11-06 15:35', 'Pendiente', 'Corte higiénico'],
         ];
-        $mascotaRepository = $manager->getRepository(Mascota::class);
         $citaRepository = $manager->getRepository(Cita::class);
+        $citaServicioRepository = $manager->getRepository(CitaServicio::class);
+        $pagoRepository = $manager->getRepository(Pago::class);
 
         foreach ($appointmentData as [$petName, $start, $end, $status, $serviceName]) {
-            $mascota = $mascotaRepository->findOneBy(['nombre' => $petName]);
+            $mascota = $mascotas[$petName] ?? null;
             if (!$mascota) {
                 continue;
             }
 
             $startAt = new \DateTime($start);
-            if ($citaRepository->findOneBy(['mascota' => $mascota, 'inicio' => $startAt])) {
-                continue;
+            $cita = $mascota->getId() === null
+                ? null
+                : $citaRepository->findOneBy(['mascota' => $mascota, 'inicio' => $startAt]);
+
+            if (!$cita) {
+                $cita = (new Cita())
+                    ->setInicio($startAt)
+                    ->setFin(new \DateTime($end))
+                    ->setEstado($status)
+                    ->setNotas('Cita de demostración')
+                    ->setCreatedAt(new \DateTimeImmutable())
+                    ->setTrabajador($admin)
+                    ->setMascota($mascota);
+                $manager->persist($cita);
             }
 
-            $cita = (new Cita())
-                ->setInicio($startAt)
-                ->setFin(new \DateTime($end))
-                ->setEstado($status)
-                ->setNotas('Cita de demostración')
-                ->setCreatedAt(new \DateTimeImmutable())
-                ->setTrabajador($admin)
-                ->setMascota($mascota);
-            $manager->persist($cita);
+            $service = $services[$serviceName];
+            $servicePrice = $servicePrices[$serviceName][$mascota->getTamano()] ?? '35.00';
+            $citaServicio = $cita->getId() === null
+                ? null
+                : $citaServicioRepository->findOneBy(['cita' => $cita, 'servicio' => $service]);
 
-            $citaServicio = (new CitaServicio())
-                ->setPrecioAplicado('35.00')
-                ->setDuracionAplicada($services[$serviceName]->getDuracionMins())
-                ->setCita($cita)
-                ->setServicio($services[$serviceName]);
-            $manager->persist($citaServicio);
+            if (!$citaServicio) {
+                $citaServicio = (new CitaServicio())
+                    ->setPrecioAplicado($servicePrice)
+                    ->setDuracionAplicada($service->getDuracionMins())
+                    ->setCita($cita)
+                    ->setServicio($service);
+                $manager->persist($citaServicio);
+            }
+
+            if ($status === 'Realizada' && ($cita->getId() === null || !$pagoRepository->findOneBy(['cita' => $cita]))) {
+                $pago = (new Pago())
+                    ->setImporte($servicePrice)
+                    ->setMetodoPago('Tarjeta')
+                    ->setEstado('Completado')
+                    ->setObservaciones('Pago de demostración')
+                    ->setCreatedAt(new \DateTimeImmutable())
+                    ->setCita($cita);
+                $manager->persist($pago);
+            }
         }
 
         $employeeAppointmentData = [
@@ -174,32 +221,108 @@ final class AppFixtures extends Fixture
         ];
 
         foreach ($employeeAppointmentData as [$petName, $start, $end, $status, $serviceName, $employeeEmail]) {
-            $mascota = $mascotaRepository->findOneBy(['nombre' => $petName]);
+            $mascota = $mascotas[$petName] ?? null;
             if (!$mascota) {
                 continue;
             }
 
             $startAt = new \DateTime($start);
-            if ($citaRepository->findOneBy(['mascota' => $mascota, 'inicio' => $startAt])) {
-                continue;
+            $cita = $mascota->getId() === null
+                ? null
+                : $citaRepository->findOneBy(['mascota' => $mascota, 'inicio' => $startAt]);
+
+            if (!$cita) {
+                $cita = (new Cita())
+                    ->setInicio($startAt)
+                    ->setFin(new \DateTime($end))
+                    ->setEstado($status)
+                    ->setNotas('Cita de demostración para el equipo.')
+                    ->setCreatedAt(new \DateTimeImmutable())
+                    ->setTrabajador($employees[$employeeEmail])
+                    ->setMascota($mascota);
+                $manager->persist($cita);
             }
 
-            $cita = (new Cita())
-                ->setInicio($startAt)
-                ->setFin(new \DateTime($end))
-                ->setEstado($status)
-                ->setNotas('Cita de demostración para el equipo.')
-                ->setCreatedAt(new \DateTimeImmutable())
-                ->setTrabajador($employees[$employeeEmail])
-                ->setMascota($mascota);
-            $manager->persist($cita);
+            $service = $services[$serviceName];
+            $servicePrice = $servicePrices[$serviceName][$mascota->getTamano()] ?? '35.00';
+            $citaServicio = $cita->getId() === null
+                ? null
+                : $citaServicioRepository->findOneBy(['cita' => $cita, 'servicio' => $service]);
 
-            $citaServicio = (new CitaServicio())
-                ->setPrecioAplicado('35.00')
-                ->setDuracionAplicada($services[$serviceName]->getDuracionMins())
-                ->setCita($cita)
-                ->setServicio($services[$serviceName]);
-            $manager->persist($citaServicio);
+            if (!$citaServicio) {
+                $citaServicio = (new CitaServicio())
+                    ->setPrecioAplicado($servicePrice)
+                    ->setDuracionAplicada($service->getDuracionMins())
+                    ->setCita($cita)
+                    ->setServicio($service);
+                $manager->persist($citaServicio);
+            }
+
+            if ($status === 'Realizada' && ($cita->getId() === null || !$pagoRepository->findOneBy(['cita' => $cita]))) {
+                $pago = (new Pago())
+                    ->setImporte($servicePrice)
+                    ->setMetodoPago('Tarjeta')
+                    ->setEstado('Completado')
+                    ->setObservaciones('Pago de demostración')
+                    ->setCreatedAt(new \DateTimeImmutable())
+                    ->setCita($cita);
+                $manager->persist($pago);
+            }
+        }
+
+        $productoRepository = $manager->getRepository(Producto::class);
+        $productData = [
+            ['Champú dermoprotector', 'Champú suave para pieles sensibles.', '15.50', 24, 'Higiene'],
+            ['Acondicionador hidratante', 'Acondicionador para facilitar el cepillado.', '12.00', 18, 'Cuidado del manto'],
+        ];
+        $products = [];
+
+        foreach ($productData as [$name, $description, $price, $stock, $category]) {
+            $product = $productoRepository->findOneBy(['nombre' => $name]);
+
+            if (!$product) {
+                $product = (new Producto())->setNombre($name)->setCreatedAt(new \DateTimeImmutable());
+                $manager->persist($product);
+            }
+
+            $product
+                ->setDescripcion($description)
+                ->setPrecio($price)
+                ->setStock($stock)
+                ->setCategoria($category)
+                ->setActivo(true);
+            $products[$name] = $product;
+        }
+
+        $saleNote = 'Venta de demostración PeluCan';
+        $ventaRepository = $manager->getRepository(Venta::class);
+        $venta = $ventaRepository->findOneBy(['observaciones' => $saleNote]);
+
+        if (!$venta) {
+            $venta = (new Venta())
+                ->setMetodoPago('Tarjeta')
+                ->setEstado('Completada')
+                ->setObservaciones($saleNote)
+                ->setCliente($clients['ana.torres@pelucan.test'])
+                ->setTrabajador($admin);
+            $manager->persist($venta);
+        }
+
+        $ventaDetallesRepository = $manager->getRepository(VentaDetalles::class);
+        foreach ([['Champú dermoprotector', 2], ['Acondicionador hidratante', 1]] as [$productName, $quantity]) {
+            $product = $products[$productName];
+            $detalle = $venta->getId() === null
+                ? null
+                : $ventaDetallesRepository->findOneBy(['venta' => $venta, 'producto' => $product]);
+
+            if (!$detalle) {
+                $detalle = (new VentaDetalles())
+                    ->setCantidad($quantity)
+                    ->setPrecioUnitario($product->getPrecio())
+                    ->setProducto($product)
+                    ->setVenta($venta);
+                $manager->persist($detalle);
+            }
         }
 
         $manager->flush();
