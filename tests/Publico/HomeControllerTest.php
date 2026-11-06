@@ -13,7 +13,9 @@ final class HomeControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Porque ellos también');
-        self::assertSelectorTextContains('#servicios', 'Baño y secado');
+        self::assertSelectorTextContains('#servicios', 'Baño e hidratación');
+        self::assertSelectorTextContains('#home-method-title', 'El Método PeluCan en 4 pasos');
+        self::assertSelectorCount(4, '.home-price-card');
         self::assertSelectorExists('img[src*="golden-sinfondo-transparent.png"]');
     }
 }
