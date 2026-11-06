@@ -1,20 +1,96 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello Publico/HomeController!{% endblock %}
+{% block title %}PeluCan | Peluquería canina profesional{% endblock %}
+
+{% block stylesheets %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; overflow-wrap: anywhere; }
-</style>
+<div class="public-home">
+    <header class="home-header">
+        <div class="home-shell home-header-inner">
+            <a class="home-brand" href="{{ path('app_publico_home') }}" aria-label="PeluCan, inicio">
+                {{ include('publico/components/_paw.html.twig', {class: 'home-brand-mark'}) }}
+                <span>PeluCan</span>
+            </a>
+            <nav class="home-nav" aria-label="Navegación principal">
+                <a class="is-current" href="#inicio">Inicio</a><a href="#servicios">Servicios</a><a href="#nosotros">Sobre nosotros</a><a href="#contacto">Contacto</a>
+            </nav>
+            <div class="home-header-actions">
+                <a class="home-button home-button--quiet" href="{{ path('app_login') }}">Iniciar sesión</a>
+                <a class="home-button home-button--primary" href="{{ path('app_register') }}">Registrarme</a>
+            </div>
+            <details class="home-mobile-menu">
+                <summary aria-label="Abrir menú de navegación"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></summary>
+                <nav aria-label="Navegación móvil">
+                    <a href="#inicio">Inicio</a><a href="#servicios">Servicios</a><a href="#nosotros">Sobre nosotros</a><a href="#contacto">Contacto</a>
+                    <a href="{{ path('app_login') }}">Iniciar sesión</a><a href="{{ path('app_register') }}">Registrarme</a>
+                </nav>
+            </details>
+        </div>
+    </header>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    <main>
+        <section class="home-hero" id="inicio" aria-labelledby="home-hero-title">
+            <div class="home-shell home-hero-grid">
+                <div class="home-hero-copy">
+                    <p class="home-eyebrow">{{ include('publico/components/_paw.html.twig', {class: 'home-eyebrow-paw'}) }}Peluquería Canina Profesional</p>
+                    <h1 id="home-hero-title">Porque ellos también<br class="home-desktop-break"> merecen <span class="home-highlight">lo mejor<svg aria-hidden="true" viewBox="0 0 190 20" preserveAspectRatio="none"><path d="M5 15C49 2 128 1 184 12"/></svg></span></h1>
+                    <p class="home-hero-description">En PeluCan cuidamos, mimamos y embellecemos a tu mascota con el cariño que se merece.</p>
+                    <div class="home-hero-actions">
+                        <a class="home-button home-button--primary" href="{{ path('app_login') }}">Agendar cita <span aria-hidden="true">→</span></a>
+                        <a class="home-button home-button--outline" href="#servicios">Conoce nuestros servicios</a>
+                    </div>
+                </div>
+                <div class="home-hero-art" aria-label="Golden retriever listo para su sesión de peluquería">
+                    <div class="home-hero-blob" aria-hidden="true"></div>
+                    {{ include('publico/components/_paw.html.twig', {class: 'home-paw home-paw--hero'}) }}
+                    <img class="home-hero-dog" src="{{ asset('img/golden-sinfondo-transparent.png') }}" alt="Golden retriever sonriente" fetchpriority="high" draggable="true">
+                    <div class="home-hero-note"><span class="home-heart-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg></span><span>Mascotas felices,<br>dueños tranquilos</span></div>
+                </div>
+            </div>
+        </section>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/home/rault/proyectos/peluqueria-canina/src/Controller/Publico/HomeController.php</code></li>
-        <li>Your template at <code>/home/rault/proyectos/peluqueria-canina/templates/publico/home/index.html.twig</code></li>
-    </ul>
+        <section class="home-benefits home-shell" aria-label="Ventajas de PeluCan">
+            <article class="home-benefit"><span class="home-benefit-icon home-benefit-icon--blue" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><path d="m12 3 8 3v5c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6l8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span><span>Atención profesional<br>y segura</span></article>
+            <article class="home-benefit"><span class="home-benefit-icon home-benefit-icon--pink" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg></span><span>Cuidado con mucho<br>amor</span></article>
+            <article class="home-benefit"><span class="home-benefit-icon home-benefit-icon--blue" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span>Horarios flexibles</span></article>
+            <article class="home-benefit"><span class="home-benefit-icon home-benefit-icon--blue" aria-hidden="true">{{ include('publico/components/_paw.html.twig', {class: 'home-benefit-paw'}) }}</span><span>Instalaciones cómodas<br>y limpias</span></article>
+        </section>
+
+        <section class="home-services" id="servicios" aria-labelledby="home-services-title">
+            {{ include('publico/components/_paw.html.twig', {class: 'home-paw home-paw--services'}) }}
+            <div class="home-shell home-services-grid">
+                <div class="home-service-photo"><div class="home-photo-shape" aria-hidden="true"></div><img src="{{ asset('img/golden-login.webp') }}" alt="Golden retriever disfrutando de su cuidado" loading="lazy"><svg class="home-photo-rays" viewBox="0 0 48 52" aria-hidden="true"><path d="M26 5 31 16M8 23 20 24M15 44 24 35"/></svg></div>
+                <div class="home-services-copy">
+                    <p class="home-eyebrow">{{ include('publico/components/_paw.html.twig', {class: 'home-eyebrow-paw'}) }}Nuestros servicios</p>
+                    <h2 id="home-services-title">Todo lo que tu mascota necesita en un solo lugar</h2>
+                    <p>Ofrecemos una amplia gama de servicios de peluquería canina, desde baños hasta cortes especializados.</p>
+                    <a class="home-button home-button--primary" href="{{ path('app_login') }}">Ver servicios <span aria-hidden="true">→</span></a>
+                </div>
+                <ul class="home-service-list" aria-label="Servicios destacados">
+                    <li><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M4 10h16l-1.5 10h-13L4 10Z"/><path d="M7 10a5 5 0 0 1 10 0M3 14h18M9 6V4m6 2V4"/></svg></span>Baño y secado</li>
+                    <li><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.7"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="m8 8 8 8m0-8-8 8"/></svg></span>Corte de pelo</li>
+                    <li><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M12 21a8 8 0 1 1 8-8c0 2-1 3-2.5 3S15 15 15 13a3 3 0 1 0-3 3v5Z"/><circle cx="8" cy="9" r=".8"/><circle cx="12" cy="7" r=".8"/></svg></span>Limpieza de oídos</li>
+                    <li><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="m14 6 4 4M4 20l4.5-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z"/><path d="m13 7 4 4"/></svg></span>Corte de uñas</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="home-about home-shell" id="nosotros" aria-labelledby="home-about-title">
+            <div><p class="home-eyebrow">Un cuidado pensado para ellos</p><h2 id="home-about-title">Un buen día empieza con sentirse bien</h2></div>
+            <p>En PeluCan cada visita se adapta a la personalidad y las necesidades de tu mascota. Nuestro equipo cuida cada detalle para que vuelva a casa limpia, cómoda y feliz.</p>
+            <a class="home-text-link" href="{{ path('app_register') }}">Conócenos mejor <span aria-hidden="true">→</span></a>
+        </section>
+    </main>
+
+    <footer class="home-footer" id="contacto"><div class="home-shell home-footer-inner">
+        <a class="home-brand" href="{{ path('app_publico_home') }}">{{ include('publico/components/_paw.html.twig', {class: 'home-brand-mark'}) }}<span>PeluCan</span></a>
+        <p>El cuidado que se nota. El cariño que se siente.</p>
+        <a class="home-footer-link" href="{{ path('app_login') }}">Entra en tu cuenta para gestionar tus citas <span aria-hidden="true">→</span></a>
+    </div></footer>
 </div>
 {% endblock %}
